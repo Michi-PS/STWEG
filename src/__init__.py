@@ -1,0 +1,1 @@
+# STWEG - Stockwerkeigentümergesellschaft Nebenkostenverwaltung
