@@ -1,7 +1,7 @@
 # STWEG - Stockwerkeigentümergesellschaft Nebenkostenverwaltung
 # Makefile für Entwicklung
 
-.PHONY: help install test test-cov lint format clean setup-data run-analyzer
+.PHONY: help install test test-cov lint format clean setup-data run-analyzer run-web run-cli
 
 # Standardziel
 help:
@@ -14,6 +14,8 @@ help:
 	@echo "  clean       - Temporäre Dateien löschen"
 	@echo "  setup-data  - Test-Daten erstellen"
 	@echo "  run-analyzer - Excel-Analyzer testen"
+	@echo "  run-web     - Web-App starten (Port 8080)"
+	@echo "  run-cli     - CLI testen"
 
 # Dependencies installieren
 install:
@@ -54,7 +56,16 @@ setup-data:
 run-analyzer:
 	python src/cli.py analyze data/sample/test_data.xlsx --report
 
+# Web-App starten
+run-web:
+	python -c "import sys; sys.path.insert(0, 'src'); from web.app import app; print('🚀 STWEG Web-Interface startet auf Port 8080...'); print('🌐 Dashboard: http://localhost:8080'); app.run(debug=True, host='0.0.0.0', port=8080)"
+
+# CLI testen
+run-cli:
+	python src/cli.py --help
+
 # Entwicklungsumgebung einrichten
 setup: install setup-data
 	@echo "Entwicklungsumgebung eingerichtet!"
 	@echo "Führen Sie 'make test' aus, um die Tests zu starten"
+

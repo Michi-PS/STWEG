@@ -248,3 +248,4 @@ class Verbrauchsdaten(Base):
         
         session.commit()
         return verbrauchsdaten_list
+

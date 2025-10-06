@@ -63,8 +63,10 @@ class ExcelAnalyzer:
             result = {
                 'file_path': file_path,
                 'sheets': excel_data.sheet_names,
+                'main_sheet': excel_data.sheet_names[0] if excel_data.sheet_names else None,
                 'columns': {},
                 'sample_data': {},
+                'row_count': 0,
                 'validation_status': 'unknown',
                 'validation_errors': []
             }
@@ -79,6 +81,12 @@ class ExcelAnalyzer:
                 # Beispiel-Daten extrahieren (maximal 5 Zeilen)
                 sample_size = min(5, len(df))
                 result['sample_data'][sheet_name] = df.head(sample_size).to_dict('records')
+                
+                # Haupt-Sheet bestimmen (erstes Sheet mit Daten)
+                if result['main_sheet'] == sheet_name and len(df) > 0:
+                    result['main_columns'] = list(df.columns)  # Für main_sheet
+                    result['row_count'] = len(df)
+                    result['main_sample_data'] = df.head(sample_size).to_dict('records')  # Für main_sheet
             
             # Validierung durchführen
             validation_result = self._validate_structure(result)

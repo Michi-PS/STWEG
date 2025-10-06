@@ -75,3 +75,4 @@ gh release create v0.3.0 \
 
 echo "✅ Release v0.3.0 erfolgreich erstellt!"
 echo "🌐 GitHub: https://github.com/Michi-PS/STWEG/releases"
+

@@ -375,6 +375,276 @@ async function clearDatabase() {
 }
 
 /**
+ * Excel-Datei erkunden
+ */
+async function exploreCurrentFile() {
+    console.log('🔍 exploreCurrentFile() aufgerufen');
+    
+    const fileInput = document.getElementById('excel-file');
+    const file = fileInput.files[0];
+    
+    console.log('📁 Datei-Input:', fileInput);
+    console.log('📄 Ausgewählte Datei:', file);
+    
+    if (!file) {
+        console.log('❌ Keine Datei ausgewählt');
+        alert('Bitte wählen Sie zuerst eine Excel-Datei aus!');
+        return;
+    }
+    
+    try {
+        console.log('🚀 Starte Excel-Erkundung...');
+        
+        // Datei hochladen
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        console.log('📤 Lade Datei hoch...');
+        const uploadResponse = await fetch('/api/excel/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        console.log('📥 Upload-Response:', uploadResponse.status);
+        const uploadData = await uploadResponse.json();
+        console.log('📊 Upload-Daten:', uploadData);
+        
+        if (!uploadResponse.ok) {
+            throw new Error(uploadData.error);
+        }
+        
+        // Datei erkunden
+        console.log('🔍 Erkunde Datei...');
+        const exploreResponse = await fetch(`/api/excel/explore/${uploadData.filename}`);
+        console.log('📥 Explore-Response:', exploreResponse.status);
+        
+        const exploreData = await exploreResponse.json();
+        console.log('📊 Explore-Daten:', exploreData);
+        
+        if (!exploreResponse.ok) {
+            throw new Error(exploreData.error);
+        }
+        
+        // Ergebnisse anzeigen
+        console.log('🎨 Zeige Ergebnisse an...');
+        displayExplorationResults(exploreData.result);
+        
+    } catch (error) {
+        console.error('❌ Fehler bei der Excel-Erkundung:', error);
+        alert(`Fehler bei der Excel-Erkundung: ${error.message}`);
+    }
+}
+
+/**
+ * Erkundungs-Ergebnisse anzeigen (ZEV-spezifisch)
+ */
+function displayExplorationResults(result) {
+    const analysisDiv = document.getElementById('excel-analysis');
+    const contentDiv = document.getElementById('analysis-content');
+    
+    // Status-Badge
+    const statusBadge = result.structure_verified ? 
+        '<span class="badge bg-success">✅ Struktur verifiziert</span>' : 
+        '<span class="badge bg-danger">❌ Struktur-Probleme</span>';
+    
+    let html = `
+        <div class="exploration-results">
+            <h6 class="text-primary mb-3">
+                <i class="fas fa-search"></i> 🔍 ZEV-Bilanz Analyse: ${result.file_name}
+                ${statusBadge}
+            </h6>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">📊 ZEV-Übersicht</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Gesamt Zähler:</strong> ${result.summary.total_zaehler}</p>
+                            <p><strong>Hauptzähler:</strong> ${result.summary.hauptzaehler}</p>
+                            <p><strong>Unterzähler:</strong> ${result.summary.unterzaehler}</p>
+                            <p><strong>Virtuelle Zähler:</strong> ${result.summary.virtuelle_zaehler}</p>
+                            <p><strong>Gesamt Messpunkte:</strong> ${result.summary.total_messpunkte}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">📈 Struktur-Info</h6>
+                        </div>
+                        <div class="card-body">
+    `;
+    
+    if (result.structure_info.errors && result.structure_info.errors.length > 0) {
+        html += `
+            <div class="alert alert-danger">
+                <strong>Fehler:</strong>
+                <ul class="mb-0">
+        `;
+        result.structure_info.errors.forEach(error => {
+            html += `<li>${error}</li>`;
+        });
+        html += `</ul></div>`;
+    }
+    
+    if (result.structure_info.warnings && result.structure_info.warnings.length > 0) {
+        html += `
+            <div class="alert alert-warning">
+                <strong>Warnungen:</strong>
+                <ul class="mb-0">
+        `;
+        result.structure_info.warnings.forEach(warning => {
+            html += `<li>${warning}</li>`;
+        });
+        html += `</ul></div>`;
+    }
+    
+    if (result.structure_info.month_columns && result.structure_info.month_columns.length > 0) {
+        html += `<p><strong>Monatsdaten:</strong> ${result.structure_info.month_columns.length} Monate erkannt</p>`;
+    }
+    
+    html += `
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <h6 class="text-warning">📋 Zähler-Details:</h6>
+    `;
+    
+    result.zaehler_overview.forEach((zaehler, index) => {
+        // Badge-Farben für verschiedene Zähler-Typen
+        let typeBadge, typeIcon;
+        if (zaehler.type === 'hauptzaehler') {
+            typeBadge = 'bg-primary';
+            typeIcon = '⚡';
+        } else if (zaehler.type === 'unterzaehler') {
+            typeBadge = 'bg-warning';
+            typeIcon = '🔌';
+        } else if (zaehler.type === 'virtueller_zaehler') {
+            typeBadge = 'bg-info';
+            typeIcon = '🏠';
+        } else if (zaehler.type === 'virtueller_unterzaehler') {
+            typeBadge = 'bg-secondary';
+            typeIcon = '🏡';
+        } else {
+            typeBadge = 'bg-light text-dark';
+            typeIcon = '❓';
+        }
+        
+                html += `
+                    <div class="card mt-2">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                ${typeIcon} Zähler: ${zaehler.id}
+                                <span class="badge ${typeBadge}">${zaehler.type}</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Code & Name:</strong> ${zaehler.code_und_name}</p>
+                            <p><strong>Messpunkte:</strong> ${zaehler.messpunkte_count}</p>
+                            ${zaehler.parent_id ? `<p><strong>Parent:</strong> <span class="badge bg-light text-dark">${zaehler.parent_id}</span></p>` : ''}
+                `;
+                
+                // Messpunkt-Details anzeigen (falls vorhanden)
+                if (zaehler.messpunkte_details && zaehler.messpunkte_details.length > 0) {
+                    html += `
+                        <div class="mt-3">
+                            <h6 class="text-info">📊 Messpunkt-Details:</h6>
+                    `;
+                    
+                    zaehler.messpunkte_details.forEach((mp, mpIdx) => {
+                        html += `
+                            <div class="border rounded p-2 mb-2">
+                                <strong>${mp.name}</strong>
+                        `;
+                        
+                        // Werte anzeigen
+                        if (mp.values && Object.keys(mp.values).length > 0) {
+                            html += `<div class="mt-1"><small class="text-muted">Monatswerte: `;
+                            const valuePairs = Object.entries(mp.values);
+                            
+                            // Werte in einer übersichtlichen Tabelle anzeigen
+                            if (valuePairs.length > 6) {
+                                // Viele Werte: Als kompakte Liste
+                                valuePairs.forEach(([month, val], valIdx) => {
+                                    const badgeClass = val > 0 ? 'bg-success' : 'bg-light text-muted';
+                                    html += `<span class="badge ${badgeClass} me-1 mb-1">${month}: ${val}</span>`;
+                                });
+                            } else {
+                                // Wenige Werte: Als Tabelle
+                                html += `<div class="table-responsive mt-2">`;
+                                html += `<table class="table table-sm table-bordered">`;
+                                html += `<thead><tr>`;
+                                valuePairs.forEach(([month, val]) => {
+                                    html += `<th class="text-center">${month}</th>`;
+                                });
+                                html += `</tr></thead><tbody><tr>`;
+                                valuePairs.forEach(([month, val]) => {
+                                    const cellClass = val > 0 ? 'table-success' : 'table-light';
+                                    html += `<td class="text-center ${cellClass}"><strong>${val}</strong></td>`;
+                                });
+                                html += `</tr></tbody></table></div>`;
+                            }
+                            html += `</small></div>`;
+                        } else {
+                            html += `<div class="mt-1"><small class="text-muted">Keine Werte gefunden</small></div>`;
+                        }
+                        
+                        html += `</div>`;
+                    });
+                    
+                    html += `</div>`;
+                } else {
+                    // Fallback: Nur Namen anzeigen
+                    html += `
+                        <div class="mt-2">
+                            <p><strong>Messpunkt-Namen:</strong></p>
+                            <div class="row">
+                    `;
+                    
+                    zaehler.messpunkte_names.forEach(mp => {
+                        html += `
+                            <div class="col-md-4 mb-1">
+                                <span class="badge bg-light text-dark">${mp}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    if (zaehler.messpunkte_count > 3) {
+                        html += `
+                            <div class="col-md-4 mb-1">
+                                <span class="badge bg-light text-muted">... und ${zaehler.messpunkte_count - 3} weitere</span>
+                            </div>
+                        `;
+                    }
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+    });
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    contentDiv.innerHTML = html;
+    analysisDiv.style.display = 'block';
+}
+
+/**
  * Hilfsfunktion: Element-Text aktualisieren
  */
 function updateElement(id, text) {

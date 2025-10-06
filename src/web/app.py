@@ -133,15 +133,13 @@ def api_excel_upload():
         filepath.parent.mkdir(parents=True, exist_ok=True)
         file.save(str(filepath))
         
-        # Excel-Datei analysieren
-        analyzer = ExcelAnalyzer()
-        analysis_result = analyzer.analyze_file(str(filepath))
+        # Excel-Datei nur speichern (keine Analyse mit ExcelAnalyzer - NaN-Problem!)
+        # Die Analyse erfolgt später über /api/excel/explore/<filename>
         
         return jsonify({
             'success': True,
             'filename': filename,
-            'filepath': str(filepath),
-            'analysis': analysis_result
+            'filepath': str(filepath)
         })
         
     except Exception as e:
@@ -161,6 +159,50 @@ def api_excel_analyze(filename):
         analysis_result = analyzer.analyze_file(str(filepath))
         
         return jsonify(analysis_result)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/excel/explore/<filename>')
+def api_excel_explore(filename):
+    """API: ZEV-Datei mit intelligentem Parser erkunden"""
+    try:
+        filepath = Path(app.config['UPLOAD_FOLDER']) / 'excel' / filename
+        
+        if not filepath.exists():
+            return jsonify({'error': 'Datei nicht gefunden'}), 404
+        
+        # Simple ZEV-Parser verwenden (NaN-frei)
+        from src.excel_analysis.simple_zev_parser import SimpleZEVParser
+        parser = SimpleZEVParser()
+        
+        # ZEV-Datei parsen
+        print(f"🔍 DEBUG: Parse ZEV-Datei: {filepath}")
+        result = parser.parse_zev_file(str(filepath))
+        print(f"🔍 DEBUG: Result: {type(result)}")
+        
+        print(f"🔍 DEBUG: Final Result: {type(result)}")
+        print(f"🔍 DEBUG: Zähler Overview: {len(result['zaehler_overview'])}")
+        
+        # JSON-Serialisierung testen
+        try:
+            json.dumps(result)
+            print("✅ DEBUG: JSON-Serialisierung erfolgreich")
+        except Exception as json_error:
+            print(f"❌ DEBUG: JSON-Fehler: {json_error}")
+            # Fallback: Minimale Response
+            result = {
+                'file_name': filename,
+                'structure_verified': False,
+                'structure_info': {'error': 'JSON-Serialisierung fehlgeschlagen'},
+                'summary': {'total_zaehler': 0, 'total_messpunkte': 0},
+                'zaehler_overview': []
+            }
+        
+        return jsonify({
+            'success': True,
+            'result': result
+        })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

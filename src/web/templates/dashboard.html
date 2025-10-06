@@ -165,9 +165,14 @@
                                        accept=".xlsx,.xls" required>
                                 <div class="form-text">Nur .xlsx und .xls Dateien erlaubt</div>
                             </div>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-upload"></i> Hochladen & Analysieren
-                            </button>
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-upload"></i> Hochladen & Analysieren
+                                </button>
+                                <button type="button" class="btn btn-outline-primary ms-2" onclick="exploreCurrentFile()">
+                                    <i class="fas fa-search"></i> Erkunden
+                                </button>
+                            </div>
                         </form>
                         
                         <div id="excel-analysis" class="mt-3" style="display: none;">

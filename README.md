@@ -41,11 +41,44 @@ STWEG/
 └── data/                  # Eingabedateien (Excel, PDFs)
 ```
 
+## 🚀 App starten
+
+### Web-Interface (Empfohlen)
+```bash
+cd /Users/rechberger/Documents/Coding/STWEG
+source venv/bin/activate
+python -c "
+import sys
+sys.path.insert(0, 'src')
+from web.app import app
+print('🚀 STWEG Web-Interface startet auf Port 8080...')
+print('🌐 Dashboard: http://localhost:8080')
+print('📊 API-Status: http://localhost:8080/api/status')
+app.run(debug=True, host='0.0.0.0', port=8080)
+"
+```
+
+**Wichtig:** Port 5000 ist auf macOS durch AirPlay Receiver belegt, daher Port 8080 verwenden.
+
+### CLI verwenden
+```bash
+cd /Users/rechberger/Documents/Coding/STWEG
+source venv/bin/activate
+python src/cli.py --help
+python src/cli.py analyze datei.xlsx --report
+```
+
+### Verfügbare URLs
+- **Dashboard:** http://localhost:8080
+- **API-Status:** http://localhost:8080/api/status
+- **API-Tests:** http://localhost:8080/api/tests
+
 ## Entwicklungsphasen
 
-1. **Phase 1**: Excel-File Analyse Modul
-2. **Phase 2**: Grundlegende Datenstrukturen
-3. **Phase 3**: Stromkosten-Aufteilung
+1. **Phase 1**: Excel-File Analyse Modul ✅
+2. **Phase 2**: Grundlegende Datenstrukturen ✅
+3. **Phase 3**: Stromkosten-Aufteilung ✅ (Web-Interface implementiert)
 4. **Phase 4**: Nebenkosten-Verwaltung
 5. **Phase 5**: PDF-Rechnungsstellung
-6. **Phase 6**: Web-Interface (optional)
+6. **Phase 6**: Web-Interface ✅ (Implementiert)
+

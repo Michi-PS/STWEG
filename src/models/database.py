@@ -58,3 +58,4 @@ def get_db_session():
 if __name__ == "__main__":
     create_tables()
     print("Datenbank-Tabellen erstellt!")
+
