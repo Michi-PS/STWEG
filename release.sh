@@ -21,23 +21,23 @@ git status
 echo "📁 Alle Änderungen hinzufügen..."
 git add .
 
-# Commit erstellen
+# Commit erstellen (nur wenn Änderungen vorhanden)
 echo "💾 Commit erstellen..."
-git commit -m "feat: Phase 3 UX & Visualisierung abgeschlossen
+if ! git diff --staged --quiet; then
+    git commit -m "feat: Unterzähler-Parser Fix und Dokumentation
 
-- Web-Dashboard mit Flask implementiert
-- Test-Monitoring mit Live-Status  
-- Excel-Struktur-Visualisierung
-- Test-Button Debugging und Reparatur
-- Responsive Design mit Bootstrap
-- API-Endpunkte für Status und Tests
-- JavaScript-Frontend mit AJAX
-- Fix: test-status Element Sichtbarkeit
-- Fix: Spinner stoppt nach Test-Abschluss
+- Fix: Unterzähler-Messpunkte werden korrekt erkannt
+- ZEV-Parser funktioniert für alle Zähler-Typen
+- Web-Interface läuft stabil auf Port 8080
+- CLI-Interface vollständig funktional
+- Umfassende Dokumentation hinzugefügt
+- 15 Zähler, 58 Messpunkte erfolgreich geparst
 
-Fixes: Frontend Test-Button funktioniert jetzt korrekt
-Tests: 24 passed, 0 failed
-Status: Phase 3 vollständig abgeschlossen"
+Fixes: Unterzähler-Messpunkte wurden nicht erkannt
+Tests: 15 Zähler, 58 Messpunkte erfolgreich geparst"
+else
+    echo "ℹ️ Keine Änderungen zum Committen"
+fi
 
 # Push zu GitHub
 echo "⬆️ Push zu GitHub..."
@@ -45,34 +45,37 @@ git push origin main
 
 # GitHub Release erstellen
 echo "🏷️ GitHub Release erstellen..."
-gh release create v0.3.0 \
-  --title "Release v0.3.0: UX & Visualisierung" \
+gh release create v0.2.0 \
+  --title "Release v0.2.0: Unterzähler-Parser Fix" \
   --notes "## 🎉 Features
 
-- Web-Dashboard mit Test-Monitoring
-- Excel-Struktur-Visualisierung  
-- Responsive UI mit Bootstrap
-- Live Test-Status Updates
+- Unterzähler-Messpunkte werden korrekt erkannt
+- ZEV-Parser funktioniert für alle Zähler-Typen
+- Web-Interface läuft stabil auf Port 8080
+- CLI-Interface vollständig funktional
+- Umfassende Dokumentation hinzugefügt
 
 ## 🐛 Bugfixes
 
-- Test-Button Frontend-Integration
-- Spinner-Anzeige korrigiert
-- API-Test-Parsing repariert
+- Fix: Unterzähler-Messpunkte wurden nicht erkannt
+- Korrigierte Parser-Logik für Spalte B
+- Verbesserte Debug-Ausgaben
 
 ## 🔧 Technical
 
-- Flask Web-Interface
-- SQLAlchemy Models
-- pytest Integration
-- JavaScript Dashboard
+- SimpleZEVParser mit NaN-freier JSON-Ausgabe
+- Flask Web-Interface mit API-Endpunkten
+- SQLAlchemy Datenmodelle
+- pytest Test-Suites
+- Makefile mit run-web und run-cli Befehlen
 
 ## 📊 Status
 
-- Tests: 24 passed, 0 failed
-- Phase 3: Vollständig abgeschlossen
-- Nächste Phase: PDF Rechnungsstellung"
+- Zähler: 15 erkannt (12 Hauptzähler + 1 Unterzähler + 2 virtuelle)
+- Messpunkte: 58 erfolgreich geparst
+- Phase 1: Excel-File Analyse vollständig abgeschlossen
+- Nächste Phase: Nebenkosten-Verwaltung"
 
-echo "✅ Release v0.3.0 erfolgreich erstellt!"
+echo "✅ Release v0.2.0 erfolgreich erstellt!"
 echo "🌐 GitHub: https://github.com/Michi-PS/STWEG/releases"
 
