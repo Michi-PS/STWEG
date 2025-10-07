@@ -151,9 +151,32 @@
   - [ ] Session-Management
   - [ ] Audit-Log
 
-## Phase 7: Excel-Struktur-Validierung & Produktionssicherheit (Woche 13-14)
+## Phase 7: UI-Modularisierung & Benutzerfreundlichkeit (Woche 13-14) 🎯 **AKTUELL**
 
-### Sprint 7.1: Schema-Definition & Generischer Parser
+### Sprint 7.1: Modulares Dashboard
+- [ ] **US-015**: Modulares Dashboard implementieren
+  - [ ] UI-Tests für Modul-System schreiben (TDD)
+  - [ ] Sidebar-Navigation entwickeln
+  - [ ] Modul-System aufbauen (Excel-Analyse & Development)
+  - [ ] State-Management zwischen Modulen
+  - [ ] Responsive Design implementieren
+- [ ] **US-015**: API-Erweiterung für Modul-Daten
+  - [ ] Modul-spezifische Endpunkte
+  - [ ] State-Management-API
+  - [ ] Modul-Status-Endpunkte
+
+### Sprint 7.2: Development-Dashboard
+- [ ] **US-016**: Development-Modul implementieren
+  - [ ] Vollständige Roadmap-Ansicht
+  - [ ] User Stories-Übersicht mit Status
+  - [ ] Live-Test-Status und Coverage
+  - [ ] Debug-Logs mit Filterung
+  - [ ] API-Status-Monitoring
+  - [ ] Entwicklungsfortschritt-Visualisierung
+
+## Phase 8: Excel-Struktur-Validierung & Produktionssicherheit (Woche 15-16)
+
+### Sprint 8.1: Schema-Definition & Generischer Parser
 - [ ] **US-013**: Excel-Struktur-Schema definieren
   - [ ] Machine-readable YAML/JSON Schema erstellen
   - [ ] Zähler-Patterns dokumentieren
@@ -166,7 +189,7 @@
   - [ ] Vergleichs-Engine gegen Referenz-Parser
   - [ ] CLI-Integration
 
-### Sprint 7.2: Produktions-Validierung
+### Sprint 8.2: Produktions-Validierung
 - [ ] **US-014**: Automatische Validierung
   - [ ] Web-Interface Integration
   - [ ] Upload-Validierung
@@ -174,16 +197,16 @@
   - [ ] Alert-System für kritische Änderungen
   - [ ] Validierungs-Berichte
 
-## Phase 8: Testing & Deployment (Woche 15-16)
+## Phase 9: Testing & Deployment (Woche 17-18)
 
-### Sprint 8.1: Testing & QA
+### Sprint 9.1: Testing & QA
 - [ ] Unit-Tests vervollständigen
 - [ ] Integration-Tests
 - [ ] End-to-End-Tests
 - [ ] Performance-Tests
 - [ ] Security-Tests
 
-### Sprint 8.2: Deployment
+### Sprint 9.2: Deployment
 - [ ] Docker-Containerisierung
 - [ ] Production-Deployment
 - [ ] Monitoring-Setup
@@ -229,8 +252,9 @@
 - **M4 (Woche 9)**: Nebenkosten-Verwaltung vollständig
 - **M5 (Woche 11)**: PDF-Rechnungsstellung funktional
 - **M6 (Woche 12)**: Web-Interface vollständig
-- **M7 (Woche 14)**: Excel-Struktur-Validierung implementiert
-- **M8 (Woche 16)**: Production-Ready
+- **M7 (Woche 14)**: UI-Modularisierung & Development-Dashboard
+- **M8 (Woche 16)**: Excel-Struktur-Validierung implementiert
+- **M9 (Woche 18)**: Production-Ready
 
 ## Risiken & Mitigation
 
@@ -277,8 +301,9 @@
 - ✅ **Datenintegrität**: Alle Verbrauchsdaten korrekt extrahiert
 
 ### 🎯 **Nächste Schritte:**
-1. **PDF-Rechnung-Erstellung** (User Story #8) - **NÄCHSTE PRIORITÄT**
-2. **Excel-Struktur-Validierung** (User Story #13-14) - **PRODUKTIONSSICHERHEIT**
-3. **Kostenverteilung-Logik** (User Story #9)
-4. **Nebenkosten-Verwaltung** (User Story #5-7)
-5. **Web-Service-Deployment** (User Story #12)
+1. **UI-Modularisierung** (User Story #15-16) - **AKTUELL IN BEARBEITUNG**
+2. **PDF-Rechnung-Erstellung** (User Story #8) - **NÄCHSTE PRIORITÄT**
+3. **Excel-Struktur-Validierung** (User Story #13-14) - **PRODUKTIONSSICHERHEIT**
+4. **Kostenverteilung-Logik** (User Story #9)
+5. **Nebenkosten-Verwaltung** (User Story #5-7)
+6. **Web-Service-Deployment** (User Story #12)

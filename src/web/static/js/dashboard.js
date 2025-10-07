@@ -6,10 +6,14 @@
 // Globale Variablen
 let refreshInterval;
 let testRunning = false;
+let currentModule = 'excel-analysis'; // Standard-Modul
 
 // Initialisierung beim Laden der Seite
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 STWEG Dashboard initialisiert');
+    
+    // Modul-System initialisieren
+    initializeModuleSystem();
     
     // Initiale Daten laden
     loadProjectStatus();
@@ -34,6 +38,30 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('❌ Test-Button nicht gefunden');
     }
 });
+
+/**
+ * Modul-System initialisieren
+ */
+function initializeModuleSystem() {
+    console.log('🔧 Initialisiere Modul-System...');
+    
+    // Modul-Links mit Event-Listeners versehen
+    const moduleLinks = document.querySelectorAll('.module-link');
+    moduleLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const module = this.getAttribute('data-module');
+            if (module && module !== 'pdf-billing') { // PDF-Billing ist noch disabled
+                switchModule(module);
+            }
+        });
+    });
+    
+    // Standard-Modul aktivieren
+    switchModule(currentModule);
+    
+    console.log('✅ Modul-System initialisiert');
+}
 
 /**
  * Event Listeners einrichten
@@ -207,6 +235,9 @@ async function runTests() {
     }
 }
 
+// Globale Variable für aktuell hochgeladene Datei
+let currentUploadedFile = null;
+
 /**
  * Excel-Upload verarbeiten
  */
@@ -247,7 +278,12 @@ async function handleExcelUpload(event) {
         const data = await response.json();
         
         if (response.ok) {
-            displayExcelAnalysis(data.analysis);
+            // Aktuell hochgeladene Datei speichern
+            currentUploadedFile = data.filename;
+            console.log('📁 Aktuell hochgeladene Datei:', currentUploadedFile);
+            
+            // Direkt erkunden nach Upload
+            await exploreUploadedFile(currentUploadedFile);
             fileInput.value = ''; // Reset file input
         } else {
             analysisContent.innerHTML = `
@@ -375,47 +411,46 @@ async function clearDatabase() {
 }
 
 /**
- * Excel-Datei erkunden
+ * Excel-Datei erkunden (ohne erneuten Upload)
  */
 async function exploreCurrentFile() {
     console.log('🔍 exploreCurrentFile() aufgerufen');
     
-    const fileInput = document.getElementById('excel-file');
-    const file = fileInput.files[0];
-    
-    console.log('📁 Datei-Input:', fileInput);
-    console.log('📄 Ausgewählte Datei:', file);
-    
-    if (!file) {
-        console.log('❌ Keine Datei ausgewählt');
-        alert('Bitte wählen Sie zuerst eine Excel-Datei aus!');
+    if (!currentUploadedFile) {
+        console.log('❌ Keine Datei hochgeladen');
+        alert('Bitte laden Sie zuerst eine Excel-Datei hoch!');
         return;
     }
     
+    console.log('📁 Verwende bereits hochgeladene Datei:', currentUploadedFile);
+    await exploreUploadedFile(currentUploadedFile);
+}
+
+/**
+ * Hochgeladene Excel-Datei erkunden (ohne erneuten Upload)
+ */
+async function exploreUploadedFile(filename) {
+    console.log('🔍 exploreUploadedFile() aufgerufen für:', filename);
+    
+    const analysisDiv = document.getElementById('excel-analysis');
+    const analysisContent = document.getElementById('analysis-content');
+    
+    // Loading-State
+    analysisContent.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Erkunde...</span>
+            </div>
+            <span class="ms-2">Erkunde Excel-Datei...</span>
+        </div>
+    `;
+    analysisDiv.style.display = 'block';
+    
     try {
-        console.log('🚀 Starte Excel-Erkundung...');
+        console.log('🚀 Starte Excel-Erkundung für:', filename);
         
-        // Datei hochladen
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        console.log('📤 Lade Datei hoch...');
-        const uploadResponse = await fetch('/api/excel/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
-        console.log('📥 Upload-Response:', uploadResponse.status);
-        const uploadData = await uploadResponse.json();
-        console.log('📊 Upload-Daten:', uploadData);
-        
-        if (!uploadResponse.ok) {
-            throw new Error(uploadData.error);
-        }
-        
-        // Datei erkunden
-        console.log('🔍 Erkunde Datei...');
-        const exploreResponse = await fetch(`/api/excel/explore/${uploadData.filename}`);
+        // Datei erkunden (OHNE erneuten Upload!)
+        const exploreResponse = await fetch(`/api/excel/explore/${filename}`);
         console.log('📥 Explore-Response:', exploreResponse.status);
         
         const exploreData = await exploreResponse.json();
@@ -431,7 +466,11 @@ async function exploreCurrentFile() {
         
     } catch (error) {
         console.error('❌ Fehler bei der Excel-Erkundung:', error);
-        alert(`Fehler bei der Excel-Erkundung: ${error.message}`);
+        analysisContent.innerHTML = `
+            <div class="alert alert-danger">
+                <strong>Fehler bei der Excel-Erkundung:</strong> ${error.message}
+            </div>
+        `;
     }
 }
 
@@ -679,7 +718,426 @@ function showToast(message, type = 'info') {
     }, 5000);
 }
 
+/**
+ * Modul wechseln
+ */
+function switchModule(moduleName) {
+    console.log(`🔄 Wechsle zu Modul: ${moduleName}`);
+    
+    // Aktuelles Modul verstecken
+    const currentModuleElement = document.getElementById(`${currentModule}-module`);
+    if (currentModuleElement) {
+        currentModuleElement.style.display = 'none';
+    }
+    
+    // Neues Modul anzeigen
+    const newModuleElement = document.getElementById(`${moduleName}-module`);
+    if (newModuleElement) {
+        newModuleElement.style.display = 'block';
+    }
+    
+    // Sidebar-Links aktualisieren
+    const moduleLinks = document.querySelectorAll('.module-link');
+    moduleLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-module') === moduleName) {
+            link.classList.add('active');
+        }
+    });
+    
+    // Modul-Titel aktualisieren
+    const moduleTitle = document.getElementById('module-title');
+    if (moduleTitle) {
+        const titles = {
+            'excel-analysis': 'Excel-Analyse & Kostenaufteilung',
+            'development': 'Development & Monitoring',
+            'pdf-billing': 'PDF-Rechnungen'
+        };
+        moduleTitle.textContent = titles[moduleName] || moduleName;
+    }
+    
+    // Current module aktualisieren
+    currentModule = moduleName;
+    
+    // Modul-spezifische Daten laden
+    loadModuleData(moduleName);
+    
+    console.log(`✅ Modul gewechselt zu: ${moduleName}`);
+}
+
+/**
+ * Modul-spezifische Daten laden
+ */
+async function loadModuleData(moduleName) {
+    console.log(`📊 Lade Daten für Modul: ${moduleName}`);
+    
+    switch (moduleName) {
+        case 'excel-analysis':
+            // Excel-Analyse-spezifische Daten laden
+            await loadExcelModuleData();
+            break;
+        case 'development':
+            // Development-spezifische Daten laden
+            await loadDevelopmentModuleData();
+            break;
+        case 'pdf-billing':
+            // PDF-Billing-spezifische Daten laden (wenn verfügbar)
+            console.log('📄 PDF-Billing-Modul noch nicht implementiert');
+            break;
+    }
+}
+
+/**
+ * Excel-Modul-Daten laden
+ */
+async function loadExcelModuleData() {
+    console.log('📊 Lade Excel-Modul-Daten...');
+    
+    try {
+        const response = await fetch('/api/modules/excel');
+        if (response.ok) {
+            const data = await response.json();
+            updateExcelModuleData(data);
+            
+            // Aktuell hochgeladene Datei setzen (falls vorhanden)
+            if (data.last_filename && !currentUploadedFile) {
+                currentUploadedFile = data.last_filename;
+                console.log('📁 Aktuell hochgeladene Datei aus API gesetzt:', currentUploadedFile);
+            }
+        }
+    } catch (error) {
+        console.log('ℹ️ Excel-Modul-API noch nicht implementiert');
+    }
+}
+
+/**
+ * Development-Modul-Daten laden
+ */
+async function loadDevelopmentModuleData() {
+    console.log('🔧 Lade Development-Modul-Daten...');
+    
+    try {
+        // Vollständige Roadmap laden und anzeigen
+        const roadmapResponse = await fetch('/api/roadmap/full');
+        if (roadmapResponse.ok) {
+            const roadmapData = await roadmapResponse.json();
+            createSimpleRoadmapView(roadmapData);
+        }
+        
+        // Vollständige User Stories laden und anzeigen
+        const userStoriesResponse = await fetch('/api/user-stories/full');
+        if (userStoriesResponse.ok) {
+            const userStoriesData = await userStoriesResponse.json();
+            createSimpleUserStoriesView(userStoriesData);
+        }
+        
+        // Test-Status für Development-Modul aktualisieren
+        updateDevelopmentTestStatus();
+        
+    } catch (error) {
+        console.log('ℹ️ Development-Modul-APIs noch nicht vollständig implementiert');
+    }
+}
+
+/**
+ * Excel-Modul-Daten aktualisieren
+ */
+function updateExcelModuleData(data) {
+    // Excel-spezifische UI-Elemente aktualisieren
+    if (data.excel_files_count) {
+        updateElement('excel-files-count', data.excel_files_count);
+    }
+    if (data.last_upload) {
+        updateElement('last-upload', data.last_upload);
+    }
+}
+
+/**
+ * Development-Test-Status aktualisieren
+ */
+function updateDevelopmentTestStatus() {
+    // Test-Status für Development-Modul aktualisieren
+    const testsPassed = document.getElementById('tests-passed');
+    const testsFailed = document.getElementById('tests-failed');
+    
+    if (testsPassed && testsFailed) {
+        const passed = testsPassed.textContent;
+        const failed = testsFailed.textContent;
+        
+        updateElement('tests-passed-dev', passed);
+        updateElement('tests-failed-dev', failed);
+    }
+}
+
+/**
+ * Roadmap-Inhalt aktualisieren
+ */
+function updateRoadmapContent(data) {
+    const roadmapContent = document.getElementById('roadmap-content');
+    if (roadmapContent && data) {
+        // Vereinfachte Roadmap-Anzeige
+        let html = '<div class="roadmap-summary">';
+        
+        if (data.current_phase) {
+            html += `
+                <div class="alert alert-primary">
+                    <h6><i class="fas fa-flag"></i> Aktuelle Phase</h6>
+                    <strong>${data.current_phase}</strong>
+                </div>
+            `;
+        }
+        
+        if (data.next_steps && data.next_steps.length > 0) {
+            html += '<h6><i class="fas fa-list"></i> Nächste Schritte:</h6><ul>';
+            data.next_steps.forEach(step => {
+                html += `<li>${step}</li>`;
+            });
+            html += '</ul>';
+        }
+        
+        html += '</div>';
+        roadmapContent.innerHTML = html;
+    }
+}
+
+/**
+ * User Stories-Inhalt aktualisieren
+ */
+function updateUserStoriesContent(data) {
+    const userStoriesContent = document.getElementById('user-stories-content');
+    if (userStoriesContent && data) {
+        // Vereinfachte User Stories-Anzeige
+        let html = '<div class="user-stories-summary">';
+        
+        if (data.completed && data.total) {
+            html += `
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-check-circle"></i> Fortschritt</h6>
+                    <strong>${data.completed}/${data.total}</strong> User Stories abgeschlossen
+                </div>
+            `;
+            
+            // Update counters
+            updateElement('user-stories-completed', data.completed);
+            updateElement('user-stories-total', data.total);
+        }
+        
+        if (data.recent_stories && data.recent_stories.length > 0) {
+            html += '<h6><i class="fas fa-clock"></i> Aktuelle Stories:</h6><ul>';
+            data.recent_stories.forEach(story => {
+                html += `<li>${story}</li>`;
+            });
+            html += '</ul>';
+        }
+        
+        html += '</div>';
+        userStoriesContent.innerHTML = html;
+    }
+}
+
+/**
+ * Einfache Roadmap-Ansicht erstellen
+ */
+function createSimpleRoadmapView(data) {
+    const content = document.getElementById('roadmap-content');
+    
+    if (!data || data.error) {
+        content.innerHTML = '<p class="text-danger">Fehler beim Laden der Roadmap-Daten</p>';
+        return;
+    }
+    
+    let html = `
+        <div class="row text-center mb-3">
+            <div class="col-4">
+                <div class="card bg-light">
+                    <div class="card-body p-2">
+                        <h5 class="text-primary">${data.total_phases || 0}</h5>
+                        <small class="text-muted">Phasen</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card bg-light">
+                    <div class="card-body p-2">
+                        <h5 class="text-success">${data.completed_phases || 0}</h5>
+                        <small class="text-muted">Abgeschlossen</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card bg-light">
+                    <div class="card-body p-2">
+                        <h5 class="text-info">${data.status?.progress_percentage || 0}%</h5>
+                        <small class="text-muted">Fortschritt</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (data.status?.current_phase) {
+        html += `<div class="alert alert-info mb-3"><strong>Aktuelle Phase:</strong> ${data.status.current_phase}</div>`;
+    }
+    
+    if (data.phases && data.phases.length > 0) {
+        html += '<h6>Alle Phasen:</h6>';
+        data.phases.forEach(phase => {
+            const statusIcon = getPhaseStatusIcon(phase.status);
+            const statusClass = getPhaseStatusClass(phase.status);
+            
+            html += `
+                <div class="card mb-2">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">
+                                    <span class="me-2">${statusIcon}</span>
+                                    <strong>Phase ${phase.number}:</strong> ${phase.title}
+                                </h6>
+                                <span class="badge ${statusClass}">${phase.status}</span>
+                            </div>
+                        </div>
+            `;
+            
+            if (phase.sprints && phase.sprints.length > 0) {
+                html += '<div class="mt-2"><small class="text-muted">Sprints:</small><ul class="mb-0 mt-1">';
+                phase.sprints.forEach(sprint => {
+                    html += `<li><small>Sprint ${sprint.number}: ${sprint.title}</small></li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            html += '</div></div>';
+        });
+    }
+    
+    content.innerHTML = html;
+}
+
+/**
+ * Einfache User Stories-Ansicht erstellen
+ */
+function createSimpleUserStoriesView(data) {
+    const content = document.getElementById('user-stories-content');
+    
+    if (!data || data.error) {
+        content.innerHTML = '<p class="text-danger">Fehler beim Laden der User Stories-Daten</p>';
+        return;
+    }
+    
+    let html = `
+        <div class="row text-center mb-3">
+            <div class="col-4">
+                <div class="card bg-light">
+                    <div class="card-body p-2">
+                        <h5 class="text-primary">${data.total_epics || 0}</h5>
+                        <small class="text-muted">Epics</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card bg-light">
+                    <div class="card-body p-2">
+                        <h5 class="text-success">${data.completed_stories || 0}</h5>
+                        <small class="text-muted">Abgeschlossen</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="card bg-light">
+                    <div class="card-body p-2">
+                        <h5 class="text-info">${data.total_stories || 0}</h5>
+                        <small class="text-muted">Gesamt</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress mb-3" style="height: 20px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: ${data.progress_percentage || 0}%">
+                ${data.progress_percentage || 0}%
+            </div>
+        </div>
+    `;
+    
+    if (data.epics && data.epics.length > 0) {
+        html += '<h6>Alle Epics:</h6>';
+        data.epics.forEach(epic => {
+            const completedCount = epic.stories ? epic.stories.filter(s => s.status === 'completed').length : 0;
+            const totalCount = epic.stories ? epic.stories.length : 0;
+            
+            html += `
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>Epic ${epic.number}: ${epic.title}</strong>
+                            <span class="badge bg-info">${completedCount}/${totalCount} Stories</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+            `;
+            
+            if (epic.stories && epic.stories.length > 0) {
+                epic.stories.forEach(story => {
+                    const statusIcon = story.status === 'completed' ? '✅' : '📋';
+                    const statusClass = story.status === 'completed' ? 'text-success' : 'text-muted';
+                    
+                    html += `
+                        <div class="d-flex align-items-start mb-2 p-2 bg-light rounded">
+                            <span class="me-2">${statusIcon}</span>
+                            <div>
+                                <strong class="${statusClass}">US-${story.number}:</strong>
+                                <div class="small">${story.title}</div>
+                                ${story.description ? `<div class="small text-muted mt-1">${story.description}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<p class="text-muted mb-0">Keine User Stories gefunden</p>';
+            }
+            
+            html += '</div></div>';
+        });
+    }
+    
+    content.innerHTML = html;
+}
+
+/**
+ * Hilfsfunktionen für Status
+ */
+function getPhaseStatusIcon(status) {
+    switch (status) {
+        case 'completed': return '✅';
+        case 'current': return '🔄';
+        case 'planned': return '📋';
+        default: return '❓';
+    }
+}
+
+function getPhaseStatusClass(status) {
+    switch (status) {
+        case 'completed': return 'bg-success';
+        case 'current': return 'bg-primary';
+        case 'planned': return 'bg-secondary';
+        default: return 'bg-light text-dark';
+    }
+}
+
+/**
+ * Sidebar ein-/ausblenden
+ */
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('show');
+    }
+}
+
 // Globale Funktionen für HTML-Buttons
 window.runTests = runTests;
 window.createSampleData = createSampleData;
 window.clearDatabase = clearDatabase;
+window.switchModule = switchModule;
+window.toggleSidebar = toggleSidebar;

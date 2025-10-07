@@ -127,6 +127,9 @@ def api_excel_upload():
         if not file.filename.lower().endswith(('.xlsx', '.xls')):
             return jsonify({'error': 'Nur Excel-Dateien (.xlsx, .xls) erlaubt'}), 400
         
+        # Alte Upload-Dateien bereinigen (nur die letzten 5 behalten)
+        cleanup_old_uploads()
+        
         # Datei speichern
         filename = f"upload_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
         filepath = Path(app.config['UPLOAD_FOLDER']) / 'excel' / filename
@@ -144,6 +147,34 @@ def api_excel_upload():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+def cleanup_old_uploads():
+    """Alte Upload-Dateien bereinigen (nur die letzten 5 behalten)"""
+    try:
+        excel_folder = Path(app.config['UPLOAD_FOLDER']) / 'excel'
+        if not excel_folder.exists():
+            return
+        
+        # Alle Excel-Dateien finden und nach Änderungszeit sortieren
+        excel_files = []
+        for pattern in ['*.xlsx', '*.xls']:
+            excel_files.extend(excel_folder.glob(pattern))
+        
+        # Nach Änderungszeit sortieren (neueste zuerst)
+        excel_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        
+        # Nur die letzten 5 Dateien behalten, Rest löschen
+        if len(excel_files) > 5:
+            for old_file in excel_files[5:]:
+                try:
+                    old_file.unlink()
+                    print(f"🗑️ Alte Upload-Datei gelöscht: {old_file.name}")
+                except Exception as e:
+                    print(f"⚠️ Fehler beim Löschen von {old_file.name}: {e}")
+                    
+    except Exception as e:
+        print(f"⚠️ Fehler beim Bereinigen alter Uploads: {e}")
 
 
 @app.route('/api/excel/analyze/<filename>')
@@ -294,6 +325,197 @@ def not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
     return jsonify({'error': 'Interner Server-Fehler'}), 500
+
+
+# ==================== MODUL-APIs ====================
+
+@app.route('/api/modules')
+def api_modules():
+    """API: Verfügbare Module"""
+    return jsonify({
+        'modules': [
+            {
+                'id': 'excel-analysis',
+                'name': 'Excel-Analyse & Kostenaufteilung',
+                'description': 'Excel-Dateien analysieren und Kosten aufteilen',
+                'status': 'active',
+                'icon': 'fas fa-file-excel'
+            },
+            {
+                'id': 'development',
+                'name': 'Development & Monitoring',
+                'description': 'Projektfortschritt und Entwicklungs-Tools',
+                'status': 'active',
+                'icon': 'fas fa-code'
+            },
+            {
+                'id': 'pdf-billing',
+                'name': 'PDF-Rechnungen',
+                'description': 'PDF-Rechnungen erstellen und verwalten',
+                'status': 'planned',
+                'icon': 'fas fa-file-pdf'
+            }
+        ]
+    })
+
+
+@app.route('/api/modules/status')
+def api_modules_status():
+    """API: Modul-Status"""
+    return jsonify({
+        'active_module': 'excel-analysis',
+        'modules': {
+            'excel-analysis': {
+                'status': 'active',
+                'last_used': datetime.now().isoformat(),
+                'features': ['excel_upload', 'excel_analysis', 'data_management']
+            },
+            'development': {
+                'status': 'active',
+                'last_used': datetime.now().isoformat(),
+                'features': ['test_monitoring', 'roadmap_view', 'user_stories']
+            },
+            'pdf-billing': {
+                'status': 'planned',
+                'last_used': None,
+                'features': []
+            }
+        }
+    })
+
+
+@app.route('/api/modules/excel')
+def api_modules_excel():
+    """API: Excel-Modul-spezifische Daten"""
+    try:
+        # Excel-Dateien zählen
+        excel_folder = UPLOAD_FOLDER / 'excel'
+        excel_files = list(excel_folder.glob('*.xlsx')) + list(excel_folder.glob('*.xls'))
+        
+        # Letzte Upload-Zeit
+        last_upload = None
+        last_filename = None
+        if excel_files:
+            last_file = max(excel_files, key=lambda f: f.stat().st_mtime)
+            last_upload = datetime.fromtimestamp(last_file.stat().st_mtime).strftime('%d.%m.%Y %H:%M')
+            last_filename = last_file.name
+        
+        return jsonify({
+            'excel_files_count': len(excel_files),
+            'last_upload': last_upload,
+            'last_filename': last_filename,
+            'upload_folder': str(excel_folder),
+            'supported_formats': ['.xlsx', '.xls'],
+            'files': [f.name for f in excel_files[-5:]]  # Nur die letzten 5 Dateien
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/roadmap')
+def api_roadmap():
+    """API: Roadmap-Daten (vereinfacht)"""
+    try:
+        from src.utils.markdown_parser import MarkdownParser
+        parser = MarkdownParser(project_root)
+        roadmap_data = parser.parse_roadmap()
+        
+        if 'error' in roadmap_data:
+            return jsonify(roadmap_data), 404
+        
+        # Vereinfachte Antwort für Dashboard
+        return jsonify({
+            'current_phase': roadmap_data['status']['current_phase'],
+            'next_steps': roadmap_data['status']['next_steps'],
+            'progress': roadmap_data['status']['progress_percentage'],
+            'total_phases': roadmap_data['total_phases'],
+            'completed_phases': roadmap_data['completed_phases'],
+            'last_updated': datetime.now().isoformat()
+        })
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/roadmap/full')
+def api_roadmap_full():
+    """API: Vollständige Roadmap-Daten mit allen Phasen"""
+    try:
+        from src.utils.markdown_parser import MarkdownParser
+        parser = MarkdownParser(project_root)
+        roadmap_data = parser.parse_roadmap()
+        
+        if 'error' in roadmap_data:
+            return jsonify(roadmap_data), 404
+        
+        return jsonify(roadmap_data)
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/user-stories')
+def api_user_stories():
+    """API: User Stories-Daten (vereinfacht)"""
+    try:
+        from src.utils.markdown_parser import MarkdownParser
+        parser = MarkdownParser(project_root)
+        user_stories_data = parser.parse_user_stories()
+        
+        if 'error' in user_stories_data:
+            return jsonify(user_stories_data), 404
+        
+        # Vereinfachte Antwort für Dashboard
+        recent_stories = []
+        for epic in user_stories_data['epics'][-2:]:  # Letzte 2 Epics
+            for story in epic['stories'][-1:]:  # Letzte Story pro Epic
+                recent_stories.append(f"US-{story['number']}: {story['title']}")
+        
+        return jsonify({
+            'completed': user_stories_data['completed_stories'],
+            'total': user_stories_data['total_stories'],
+            'recent_stories': recent_stories,
+            'progress_percentage': user_stories_data['progress_percentage'],
+            'total_epics': user_stories_data['total_epics']
+        })
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/user-stories/full')
+def api_user_stories_full():
+    """API: Vollständige User Stories-Daten mit allen Epics"""
+    try:
+        from src.utils.markdown_parser import MarkdownParser
+        parser = MarkdownParser(project_root)
+        user_stories_data = parser.parse_user_stories()
+        
+        if 'error' in user_stories_data:
+            return jsonify(user_stories_data), 404
+        
+        return jsonify(user_stories_data)
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/modules/config')
+def api_modules_config():
+    """API: Modul-Konfiguration"""
+    return jsonify({
+        'default_module': 'excel-analysis',
+        'auto_refresh_interval': 30000,  # 30 Sekunden
+        'features': {
+            'sidebar_collapsible': True,
+            'module_switching': True,
+            'responsive_design': True
+        },
+        'theme': {
+            'primary_color': '#0d6efd',
+            'sidebar_width': '250px'
+        }
+    })
 
 
 if __name__ == '__main__':

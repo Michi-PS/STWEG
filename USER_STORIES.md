@@ -175,3 +175,31 @@
 - [ ] Historische Struktur-Änderungen verfolgen
 - [ ] Rollback-Möglichkeit bei Validierungsfehlern
 
+## Epic 8: UI-Modularisierung & Benutzerfreundlichkeit
+
+### US-015: Modulares Dashboard
+**Als** Administrator  
+**möchte ich** ein modulares Dashboard mit verschiedenen Funktionsbereichen  
+**damit** ich zwischen produktiven Funktionen und Entwicklungs-Tools unterscheiden kann.
+
+**Akzeptanzkriterien:**
+- [ ] Sidebar-Navigation mit Modul-Auswahl
+- [ ] Excel-Analyse-Modul für produktive Funktionen
+- [ ] Development-Modul für Entwicklungs-Tools
+- [ ] Responsive Design für verschiedene Bildschirmgrößen
+- [ ] Modul-spezifische API-Endpunkte
+- [ ] State-Management zwischen Modulen
+
+### US-016: Development-Dashboard
+**Als** Entwickler  
+**möchte ich** ein dediziertes Development-Dashboard  
+**damit** ich den Projektfortschritt und alle Entwicklungs-Informationen übersichtlich verwalten kann.
+
+**Akzeptanzkriterien:**
+- [ ] Vollständige Roadmap-Ansicht
+- [ ] User Stories-Übersicht mit Status
+- [ ] Live-Test-Status und Coverage
+- [ ] Debug-Logs mit Filterung
+- [ ] API-Status-Monitoring
+- [ ] Entwicklungsfortschritt-Visualisierung
+

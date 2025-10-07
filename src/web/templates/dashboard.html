@@ -15,241 +15,427 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
+        <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-building"></i> STWEG
             </a>
-            <span class="navbar-text">
+            <span class="navbar-text d-none d-md-block">
                 Stockwerkeigentümergesellschaft Nebenkostenverwaltung
             </span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container-fluid mt-4">
-        <!-- Status Cards -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card status-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="card-title text-muted">Projekt Status</h6>
-                                <h4 class="mb-0" id="project-phase">Phase 3</h4>
-                                <small class="text-muted" id="project-status">UX & Visualisierung</small>
-                            </div>
-                            <div class="status-icon">
-                                <i class="fas fa-code-branch text-primary"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card status-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="card-title text-muted">Eigentümer</h6>
-                                <h4 class="mb-0" id="eigentuemer-count">-</h4>
-                                <small class="text-muted" id="active-eigentuemer">- aktiv</small>
-                            </div>
-                            <div class="status-icon">
-                                <i class="fas fa-users text-success"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card status-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="card-title text-muted">Messpunkte</h6>
-                                <h4 class="mb-0" id="messpunkte-count">-</h4>
-                                <small class="text-muted" id="verbrauchsdaten-count">- Verbrauchsdaten</small>
-                            </div>
-                            <div class="status-icon">
-                                <i class="fas fa-chart-line text-info"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-3">
-                <div class="card status-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="card-title text-muted">Rechnungen</h6>
-                                <h4 class="mb-0" id="rechnungen-count">-</h4>
-                                <small class="text-muted">Nebenkosten</small>
-                            </div>
-                            <div class="status-icon">
-                                <i class="fas fa-file-invoice text-warning"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Dashboard Content -->
+    <!-- Main Layout -->
+    <div class="container-fluid">
         <div class="row">
-            <!-- Test Monitoring -->
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-vial text-primary"></i> Test Monitoring
-                        </h5>
-                        <button class="btn btn-sm btn-outline-primary" onclick="runTests()">
-                            <i class="fas fa-play"></i> Tests ausführen
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="test-status" class="text-center">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Tests werden ausgeführt...</span>
-                            </div>
-                            <p class="mt-2">Tests werden geladen...</p>
+            <!-- Sidebar Navigation -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" id="sidebar">
+                <div class="position-sticky pt-3">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Module</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active module-link" href="#" data-module="excel-analysis">
+                                <i class="fas fa-file-excel text-success"></i>
+                                Excel-Analyse
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link module-link" href="#" data-module="development">
+                                <i class="fas fa-code text-primary"></i>
+                                Development
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link module-link disabled" href="#" data-module="pdf-billing">
+                                <i class="fas fa-file-pdf text-danger"></i>
+                                PDF-Rechnungen
+                                <small class="text-muted">(Bald verfügbar)</small>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>System</span>
+                    </h6>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/api/status" target="_blank">
+                                <i class="fas fa-server text-info"></i>
+                                API Status
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/api/tests" target="_blank">
+                                <i class="fas fa-vial text-warning"></i>
+                                Test Status
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2" id="module-title">Excel-Analyse</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleSidebar()">
+                                <i class="fas fa-bars"></i>
+                            </button>
                         </div>
-                        
-                        <div id="test-results" style="display: none;">
-                            <div class="row text-center">
-                                <div class="col-4">
-                                    <div class="test-stat">
-                                        <h3 id="tests-passed" class="text-success">-</h3>
-                                        <small class="text-muted">Bestanden</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="test-stat">
-                                        <h3 id="tests-failed" class="text-danger">-</h3>
-                                        <small class="text-muted">Fehlgeschlagen</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="test-stat">
-                                        <h3 id="tests-total" class="text-primary">-</h3>
-                                        <small class="text-muted">Gesamt</small>
+                    </div>
+                </div>
+
+                <!-- Module Content -->
+                <div id="module-content">
+                    <!-- Excel-Analyse Modul -->
+                    <div id="excel-analysis-module" class="module-content">
+                        <!-- Status Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Eigentümer</h6>
+                                                <h4 class="mb-0" id="eigentuemer-count">-</h4>
+                                                <small class="text-muted" id="active-eigentuemer">- aktiv</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-users text-success"></i>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="mt-3">
-                                <small class="text-muted">Letztes Update: <span id="test-timestamp">-</span></small>
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Messpunkte</h6>
+                                                <h4 class="mb-0" id="messpunkte-count">-</h4>
+                                                <small class="text-muted" id="verbrauchsdaten-count">- Verbrauchsdaten</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-chart-line text-info"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Rechnungen</h6>
+                                                <h4 class="mb-0" id="rechnungen-count">-</h4>
+                                                <small class="text-muted">Nebenkosten</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-file-invoice text-warning"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-            <!-- Excel Analyzer -->
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-file-excel text-success"></i> Excel Analyzer
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="excel-upload-form" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label for="excel-file" class="form-label">Excel-Datei hochladen</label>
-                                <input type="file" class="form-control" id="excel-file" 
-                                       accept=".xlsx,.xls" required>
-                                <div class="form-text">Nur .xlsx und .xls Dateien erlaubt</div>
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Excel-Dateien</h6>
+                                                <h4 class="mb-0" id="excel-files-count">-</h4>
+                                                <small class="text-muted" id="last-upload">- hochgeladen</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-file-excel text-success"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-upload"></i> Hochladen & Analysieren
-                                </button>
-                                <button type="button" class="btn btn-outline-primary ms-2" onclick="exploreCurrentFile()">
-                                    <i class="fas fa-search"></i> Erkunden
-                                </button>
-                            </div>
-                        </form>
-                        
-                        <div id="excel-analysis" class="mt-3" style="display: none;">
-                            <h6>Analyse-Ergebnis:</h6>
-                            <div id="analysis-content" class="bg-light p-3 rounded"></div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Database Management -->
-        <div class="row">
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-database text-info"></i> Datenbank Management
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-info" onclick="createSampleData()">
-                                <i class="fas fa-plus"></i> Beispieldaten erstellen
-                            </button>
-                            <button class="btn btn-warning" onclick="clearDatabase()">
-                                <i class="fas fa-trash"></i> Datenbank leeren
-                            </button>
-                        </div>
-                        
-                        <div class="mt-3">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle"></i> 
-                                Beispieldaten erstellen 7 Eigentümer, Messpunkte und Test-Verbrauchsdaten
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        <!-- Excel Analyzer -->
+                        <div class="row">
+                            <div class="col-lg-8 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-file-excel text-success"></i> Excel Analyzer
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="excel-upload-form" enctype="multipart/form-data">
+                                            <div class="mb-3">
+                                                <label for="excel-file" class="form-label">Excel-Datei hochladen</label>
+                                                <input type="file" class="form-control" id="excel-file" 
+                                                       accept=".xlsx,.xls" required>
+                                                <div class="form-text">Nur .xlsx und .xls Dateien erlaubt</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="fas fa-upload"></i> Hochladen & Analysieren
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary ms-2" onclick="exploreCurrentFile()">
+                                                    <i class="fas fa-search"></i> Erkunden
+                                                </button>
+                                            </div>
+                                        </form>
+                                        
+                                        <div id="excel-analysis" class="mt-3" style="display: none;">
+                                            <h6>Analyse-Ergebnis:</h6>
+                                            <div id="analysis-content" class="bg-light p-3 rounded"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-            <!-- Project Progress -->
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-pie text-primary"></i> Projekt Fortschritt
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="progress mb-3" style="height: 25px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                 role="progressbar" style="width: 65%" id="progress-bar">
-                                65%
+                            <!-- Database Management -->
+                            <div class="col-lg-4 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-database text-info"></i> Datenbank Management
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-info" onclick="createSampleData()">
+                                                <i class="fas fa-plus"></i> Beispieldaten erstellen
+                                            </button>
+                                            <button class="btn btn-warning" onclick="clearDatabase()">
+                                                <i class="fas fa-trash"></i> Datenbank leeren
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle"></i> 
+                                                Beispieldaten erstellen 7 Eigentümer, Messpunkte und Test-Verbrauchsdaten
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="project-phases">
-                            <div class="phase-item completed">
-                                <i class="fas fa-check-circle text-success"></i>
-                                <span>Phase 1: Excel-Analyse</span>
+                    </div>
+
+                    <!-- Development Modul -->
+                    <div id="development-module" class="module-content" style="display: none;">
+                        <!-- Development Status Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Projekt Status</h6>
+                                                <h4 class="mb-0" id="project-phase">Phase 7</h4>
+                                                <small class="text-muted" id="project-status">UI-Modularisierung</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-code-branch text-primary"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="phase-item completed">
-                                <i class="fas fa-check-circle text-success"></i>
-                                <span>Phase 2: Datenmodelle</span>
+                            
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Tests</h6>
+                                                <h4 class="mb-0" id="tests-passed-dev">-</h4>
+                                                <small class="text-muted" id="tests-failed-dev">- fehlgeschlagen</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-vial text-success"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="phase-item active">
-                                <i class="fas fa-play-circle text-primary"></i>
-                                <span>Phase 3: UX & Visualisierung</span>
+                            
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">User Stories</h6>
+                                                <h4 class="mb-0" id="user-stories-completed">-</h4>
+                                                <small class="text-muted" id="user-stories-total">- gesamt</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-list-check text-info"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="phase-item">
-                                <i class="fas fa-circle text-muted"></i>
-                                <span>Phase 4: PDF-Rechnungen</span>
+
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Fortschritt</h6>
+                                                <h4 class="mb-0" id="progress-percentage">85%</h4>
+                                                <small class="text-muted">Gesamtprojekt</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-chart-pie text-warning"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Development Content -->
+                        <div class="row">
+                            <!-- Test Monitoring -->
+                            <div class="col-lg-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-vial text-primary"></i> Test Monitoring
+                                        </h5>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="runTests()">
+                                            <i class="fas fa-play"></i> Tests ausführen
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="test-status" class="text-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Tests werden ausgeführt...</span>
+                                            </div>
+                                            <p class="mt-2">Tests werden geladen...</p>
+                                        </div>
+                                        
+                                        <div id="test-results" style="display: none;">
+                                            <div class="row text-center">
+                                                <div class="col-4">
+                                                    <div class="test-stat">
+                                                        <h3 id="tests-passed" class="text-success">-</h3>
+                                                        <small class="text-muted">Bestanden</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="test-stat">
+                                                        <h3 id="tests-failed" class="text-danger">-</h3>
+                                                        <small class="text-muted">Fehlgeschlagen</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="test-stat">
+                                                        <h3 id="tests-total" class="text-primary">-</h3>
+                                                        <small class="text-muted">Gesamt</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-3">
+                                                <small class="text-muted">Letztes Update: <span id="test-timestamp">-</span></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Project Progress -->
+                            <div class="col-lg-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-chart-pie text-primary"></i> Projekt Fortschritt
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="progress mb-3" style="height: 25px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                 role="progressbar" style="width: 85%" id="progress-bar">
+                                                85%
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="project-phases">
+                                            <div class="phase-item completed">
+                                                <i class="fas fa-check-circle text-success"></i>
+                                                <span>Phase 1: Excel-Analyse</span>
+                                            </div>
+                                            <div class="phase-item completed">
+                                                <i class="fas fa-check-circle text-success"></i>
+                                                <span>Phase 2: Datenmodelle</span>
+                                            </div>
+                                            <div class="phase-item completed">
+                                                <i class="fas fa-check-circle text-success"></i>
+                                                <span>Phase 3: Web-Interface</span>
+                                            </div>
+                                            <div class="phase-item completed">
+                                                <i class="fas fa-check-circle text-success"></i>
+                                                <span>Phase 4: ZEV-Parser</span>
+                                            </div>
+                                            <div class="phase-item active">
+                                                <i class="fas fa-play-circle text-primary"></i>
+                                                <span>Phase 7: UI-Modularisierung</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Development Tools -->
+                        <div class="row">
+                            <!-- Roadmap -->
+                            <div class="col-lg-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-road text-info"></i> Roadmap
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="roadmap-content">
+                                            <p class="text-muted">Roadmap wird geladen...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- User Stories -->
+                            <div class="col-lg-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-list-check text-success"></i> User Stories
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="user-stories-content">
+                                            <p class="text-muted">User Stories werden geladen...</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
 
