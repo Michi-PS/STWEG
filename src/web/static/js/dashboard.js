@@ -1083,12 +1083,12 @@ function createSimpleUserStoriesView(data) {
                     const statusClass = story.status === 'completed' ? 'text-success' : 'text-muted';
                     
                     html += `
-                        <div class="d-flex align-items-start mb-2 p-2 bg-light rounded">
-                            <span class="me-2">${statusIcon}</span>
-                            <div>
-                                <strong class="${statusClass}">US-${story.number}:</strong>
-                                <div class="small">${story.title}</div>
-                                ${story.description ? `<div class="small text-muted mt-1">${story.description}</div>` : ''}
+                        <div class="d-flex align-items-start mb-3 p-3 bg-light rounded">
+                            <span class="me-3 fs-4">${statusIcon}</span>
+                            <div class="flex-grow-1">
+                                <strong class="${statusClass} fs-6">US-${story.number}:</strong>
+                                <div class="fw-bold mb-2">${story.title}</div>
+                                ${story.description ? `<div class="text-muted">${story.description}</div>` : ''}
                             </div>
                         </div>
                     `;
