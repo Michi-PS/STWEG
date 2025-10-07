@@ -106,13 +106,14 @@ python src/cli.py validate datei.xlsx
 
 ### Datenbank-Status
 - **Eigentümer:** 7 (alle aktiv)
-- **Messpunkte:** 1
-- **Verbrauchsdaten:** 0
-- **Rechnungen:** 0
+- **Messpunkte:** 15+ (alle ZEV-Zähler erkannt)
+- **Verbrauchsdaten:** Vollständig (alle Monate für alle Zähler)
+- **Rechnungen:** 0 (bereit für PDF-Generierung)
 
 ### Entwicklungsphase
-- **Aktuell:** Phase 3 - UX & Visualisierung (65% Fortschritt)
-- **Nächste:** Phase 4 - Nebenkosten-Verwaltung
+- **Aktuell:** Phase 5 - PDF-Rechnungsstellung (bereit zu starten)
+- **Abgeschlossen:** Phase 4 - ZEV-Parser (100% funktional)
+- **Nächste:** PDF-Rechnung-Erstellung & Kostenverteilung
 
 ## 🔍 Debugging
 
@@ -138,4 +139,4 @@ pytest tests/ --cov=src --cov-report=html
 3. **sys.path.insert(0, 'src')** für Module-Imports
 4. **Web-App läuft im Hintergrund** - nicht vergessen zu stoppen
 5. **API-Endpunkte** sind vollständig funktional
-6. **ZEV-Parser** ist NaN-frei und JSON-sicher
+6. **ZEV-Parser** ist 100% funktional - alle 15 Zähler und Messpunkte erkannt

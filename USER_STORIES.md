@@ -129,9 +129,9 @@
 **damit** ich historische Daten abfragen und verwalten kann.
 
 **Akzeptanzkriterien:**
-- [ ] Datenbank-Schema ist definiert
-- [ ] CRUD-Operationen funktionieren
-- [ ] Datenintegrität ist gewährleistet
+- [x] Datenbank-Schema ist definiert
+- [x] CRUD-Operationen funktionieren
+- [x] Datenintegrität ist gewährleistet
 - [ ] Backup-Funktionen
 
 ### US-012: Benutzer-Management
@@ -144,4 +144,34 @@
 - [ ] Rollenbasierte Zugriffe
 - [ ] Passwort-Management
 - [ ] Audit-Log
+
+## Epic 7: Excel-Struktur-Validierung & Produktionssicherheit
+
+### US-013: Excel-Struktur-Validierung
+**Als** Administrator  
+**möchte ich** neue Excel-Dateien automatisch gegen die bekannte Struktur validieren  
+**damit** ich Format-Änderungen frühzeitig erkenne und Produktionsausfälle vermeide.
+
+**Akzeptanzkriterien:**
+- [ ] Machine-readable Excel-Struktur-Schema definiert
+- [ ] Generischer Parser basierend auf Schema-Regeln
+- [ ] Automatische Struktur-Validierung neuer Dateien
+- [ ] Erkennung von neuen/geänderten/gelöschten Zählern
+- [ ] Erkennung von neuen/geänderten Messpunkten
+- [ ] Vergleichs-Engine zwischen generischem und Referenz-Parser
+- [ ] CLI-Integration für manuelle Validierung
+- [ ] Web-Interface Integration für automatische Checks
+- [ ] Alerts bei kritischen Struktur-Änderungen
+
+### US-014: Produktions-Validierung
+**Als** Administrator  
+**möchte ich** jeden neuen Excel-Upload automatisch validieren  
+**damit** ich sicherstelle, dass alle Daten korrekt verarbeitet werden können.
+
+**Akzeptanzkriterien:**
+- [ ] Automatische Validierung bei Excel-Upload
+- [ ] Struktur-Änderungen in Dashboard anzeigen
+- [ ] Validierungs-Berichte generieren
+- [ ] Historische Struktur-Änderungen verfolgen
+- [ ] Rollback-Möglichkeit bei Validierungsfehlern
 

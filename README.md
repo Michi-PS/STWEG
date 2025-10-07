@@ -77,8 +77,8 @@ python src/cli.py analyze datei.xlsx --report
 
 1. **Phase 1**: Excel-File Analyse Modul ✅
 2. **Phase 2**: Grundlegende Datenstrukturen ✅
-3. **Phase 3**: Stromkosten-Aufteilung ✅ (Web-Interface implementiert)
-4. **Phase 4**: Nebenkosten-Verwaltung
-5. **Phase 5**: PDF-Rechnungsstellung
-6. **Phase 6**: Web-Interface ✅ (Implementiert)
+3. **Phase 3**: Web-Interface & Dashboard ✅
+4. **Phase 4**: ZEV-Parser & Stromkosten-Aufteilung ✅ (100% funktional)
+5. **Phase 5**: PDF-Rechnungsstellung (bereit zu starten)
+6. **Phase 6**: Nebenkosten-Verwaltung
 

@@ -151,16 +151,39 @@
   - [ ] Session-Management
   - [ ] Audit-Log
 
-## Phase 7: Testing & Deployment (Woche 15-16)
+## Phase 7: Excel-Struktur-Validierung & Produktionssicherheit (Woche 13-14)
 
-### Sprint 7.1: Testing & QA
+### Sprint 7.1: Schema-Definition & Generischer Parser
+- [ ] **US-013**: Excel-Struktur-Schema definieren
+  - [ ] Machine-readable YAML/JSON Schema erstellen
+  - [ ] Zähler-Patterns dokumentieren
+  - [ ] Messpunkt-Patterns definieren
+  - [ ] Validierungsregeln spezifizieren
+  - [ ] Regeln-Engine implementieren
+- [ ] **US-013**: Generischer Parser entwickeln
+  - [ ] Schema-basierte Extraktion
+  - [ ] Struktur-Validierung
+  - [ ] Vergleichs-Engine gegen Referenz-Parser
+  - [ ] CLI-Integration
+
+### Sprint 7.2: Produktions-Validierung
+- [ ] **US-014**: Automatische Validierung
+  - [ ] Web-Interface Integration
+  - [ ] Upload-Validierung
+  - [ ] Struktur-Änderungen-Dashboard
+  - [ ] Alert-System für kritische Änderungen
+  - [ ] Validierungs-Berichte
+
+## Phase 8: Testing & Deployment (Woche 15-16)
+
+### Sprint 8.1: Testing & QA
 - [ ] Unit-Tests vervollständigen
 - [ ] Integration-Tests
 - [ ] End-to-End-Tests
 - [ ] Performance-Tests
 - [ ] Security-Tests
 
-### Sprint 7.2: Deployment
+### Sprint 8.2: Deployment
 - [ ] Docker-Containerisierung
 - [ ] Production-Deployment
 - [ ] Monitoring-Setup
@@ -205,8 +228,9 @@
 - **M3 (Woche 6)**: Stromkosten-Verteilung funktional
 - **M4 (Woche 9)**: Nebenkosten-Verwaltung vollständig
 - **M5 (Woche 11)**: PDF-Rechnungsstellung funktional
-- **M6 (Woche 14)**: Web-Interface vollständig
-- **M7 (Woche 16)**: Production-Ready
+- **M6 (Woche 12)**: Web-Interface vollständig
+- **M7 (Woche 14)**: Excel-Struktur-Validierung implementiert
+- **M8 (Woche 16)**: Production-Ready
 
 ## Risiken & Mitigation
 
@@ -234,34 +258,27 @@
 - **Phase 1**: Foundation & Excel-Analyse (100%) ✅
 - **Phase 2**: Datenbank-Modelle (100%) ✅
 - **Phase 3**: Web-Interface & Dashboard (100%) ✅
-- **Phase 4**: ZEV-Parser-Entwicklung (95%) ✅
-- **User Stories**: US-001 bis US-007 (Excel-Analyse, Validierung, Dashboard, UX)
+- **Phase 4**: ZEV-Parser-Entwicklung (100%) ✅
+- **User Stories**: US-001 bis US-004 (Excel-Analyse, Validierung, Dashboard, ZEV-Parser)
 - **Test-Coverage**: 24 Tests, 100% Erfolg
 - **Technologie-Stack**: Python 3.13, Flask, SQLAlchemy, pandas, pytest
 - **Repository**: GitHub Repository erstellt und funktional
+- **ZEV-Daten**: Vollständige Verarbeitung aller 15 Zähler und Messpunkte
 
-### 🔍 **Aktueller Debug-Status:**
-**ZEV-Parser funktioniert zu 95% perfekt:**
+### ✅ **ZEV-Parser Status: 100% FUNKTIONAL**
+**ZEV-Parser funktioniert vollständig perfekt:**
 - ✅ **15 Zähler erkannt**: Alle Hauptzähler, Unterzähler und virtuellen Zähler
 - ✅ **Hierarchische Struktur**: Hauptzähler → Unterzähler → Hauptzähler korrekt
 - ✅ **Virtuelle Zähler**: XXLOSS und XXSELF als Hauptzähler erkannt
 - ✅ **Monats-Header**: Alle 12 Monate korrekt erkannt
 - ✅ **Messpunkt-Erkennung**: Zähler-Titel werden nicht als Messpunkte erkannt
+- ✅ **Unterzähler-Messpunkte**: Vollständig funktional - alle Messpunkte erkannt
 - ✅ **Debug-Ausgaben**: Umfassende Logs für alle Parsing-Schritte
-
-### ❌ **Letztes Problem identifiziert:**
-**Unterzähler-Messpunkte werden erkannt, aber nicht verarbeitet:**
-```
-🔍 DEBUG Alle Zeilen (Unterzähler): Zeile 117: col_a='', col_b='Bezug Netz HT [kWh]', current_zaehler=CHINV...101
-🔍 DEBUG Alle Zeilen (Unterzähler): Zeile 118: col_a='', col_b='Bezug Netz NT [kWh]', current_zaehler=CHINV...101
-```
-**Problem**: Messpunkte stehen in Spalte B, aber werden nicht als solche erkannt, weil `col_a` leer ist.
-
-### 🔧 **Nächster Fix erforderlich:**
-**In `simple_zev_parser.py` Zeile ~160-170**: Die Messpunkt-Erkennung muss für Unterzähler auch leere `col_a` berücksichtigen und in `col_b` suchen.
+- ✅ **Datenintegrität**: Alle Verbrauchsdaten korrekt extrahiert
 
 ### 🎯 **Nächste Schritte:**
-1. **Unterzähler-Messpunkt-Erkennung korrigieren** (kritisch - letzter Fix!)
-2. **PDF-Rechnung-Erstellung** (User Story #8)
+1. **PDF-Rechnung-Erstellung** (User Story #8) - **NÄCHSTE PRIORITÄT**
+2. **Excel-Struktur-Validierung** (User Story #13-14) - **PRODUKTIONSSICHERHEIT**
 3. **Kostenverteilung-Logik** (User Story #9)
-4. **Web-Service-Deployment** (User Story #12)
+4. **Nebenkosten-Verwaltung** (User Story #5-7)
+5. **Web-Service-Deployment** (User Story #12)
