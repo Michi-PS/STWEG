@@ -1094,165 +1094,60 @@ function createSimpleUserStoriesView(data) {
         return;
     }
     
+    // Layout: Links Backlog, rechts Epics/Stories
     let html = `
-        <div class="row text-center mb-3">
-            <div class="col-4">
-                <div class="card bg-light">
-                    <div class="card-body p-2">
-                        <h5 class="text-primary">${data.total_epics || 0}</h5>
-                        <small class="text-muted">Epics</small>
+        <div class="row">
+            <!-- Links: Priorisiertes Backlog -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="fas fa-list-ol"></i> Priorisiertes Backlog</h6>
                     </div>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="card bg-light">
-                    <div class="card-body p-2">
-                        <h5 class="text-success">${data.completed_stories || 0}</h5>
-                        <small class="text-muted">Abgeschlossen</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="card bg-light">
-                    <div class="card-body p-2">
-                        <h5 class="text-info">${data.total_stories || 0}</h5>
-                        <small class="text-muted">Gesamt</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="progress mb-3" style="height: 20px;">
-            <div class="progress-bar bg-success" role="progressbar" style="width: ${data.progress_percentage || 0}%">
-                ${data.progress_percentage || 0}%
-            </div>
-        </div>
+                    <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
     `;
     
-    // Priorisiertes Backlog anzeigen
-    html += '<h6 class="mb-3"><i class="fas fa-list-ol text-primary"></i> Priorisiertes Backlog:</h6>';
-    
-    if (data.epics && data.epics.length > 0) {
-        // Alle Stories sammeln und nach Priorität sortieren
-        let allStories = [];
-        data.epics.forEach(epic => {
-            if (epic.stories && epic.stories.length > 0) {
-                epic.stories.forEach(story => {
-                    allStories.push({
-                        ...story,
-                        epic_title: epic.title,
-                        epic_number: epic.number
-                    });
-                });
-            }
-        });
-        
-        // Nach Priorität und Status sortieren
-        const priorityOrder = { 'kritisch': 1, 'hoch': 2, 'mittel': 3, 'niedrig': 4 };
-        const statusOrder = { 'completed': 5, 'in-progress': 1, 'planned': 2 };
-        
-        allStories.sort((a, b) => {
-            if (a.status === 'completed' && b.status !== 'completed') return 1;
-            if (b.status === 'completed' && a.status !== 'completed') return -1;
-            
-            const aPriority = priorityOrder[a.priority] || 5;
-            const bPriority = priorityOrder[b.priority] || 5;
-            if (aPriority !== bPriority) return aPriority - bPriority;
-            
-            return (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3);
-        });
-        
-        // Stories nach Priorität gruppieren
-        const priorityGroups = {
-            'kritisch': [],
-            'hoch': [],
-            'mittel': [],
-            'niedrig': [],
-            'abgeschlossen': []
-        };
-        
-        allStories.forEach(story => {
-            if (story.status === 'completed') {
-                priorityGroups.abgeschlossen.push(story);
-            } else {
-                const priority = story.priority || 'niedrig';
-                if (priorityGroups[priority]) {
-                    priorityGroups[priority].push(story);
-                }
-            }
-        });
-        
-        // Prioritätsgruppen anzeigen
-        Object.entries(priorityGroups).forEach(([priority, stories]) => {
+    // Backlog-Daten aus Roadmap laden
+    if (data.backlog && data.backlog.priorities) {
+        Object.entries(data.backlog.priorities).forEach(([priority, stories]) => {
             if (stories.length === 0) return;
             
             const priorityColors = {
                 'kritisch': 'danger',
                 'hoch': 'warning', 
                 'mittel': 'info',
-                'niedrig': 'secondary',
-                'abgeschlossen': 'success'
+                'niedrig': 'secondary'
             };
             
             const priorityIcons = {
                 'kritisch': 'fas fa-exclamation-triangle',
                 'hoch': 'fas fa-arrow-up',
                 'mittel': 'fas fa-minus',
-                'niedrig': 'fas fa-arrow-down',
-                'abgeschlossen': 'fas fa-check-circle'
+                'niedrig': 'fas fa-arrow-down'
             };
             
             html += `
-                <div class="card mb-4">
-                    <div class="card-header bg-${priorityColors[priority]} text-white">
-                        <h6 class="mb-0">
+                <div class="border-bottom">
+                    <div class="p-3 bg-light">
+                        <h6 class="mb-2 text-${priorityColors[priority]}">
                             <i class="${priorityIcons[priority]}"></i> 
                             Priorität ${priority.charAt(0).toUpperCase() + priority.slice(1)}
-                            <span class="badge bg-light text-dark ms-2">${stories.length} Stories</span>
+                            <span class="badge bg-${priorityColors[priority]} ms-2">${stories.length}</span>
                         </h6>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="p-2">
             `;
             
             stories.forEach(story => {
-                const statusClass = story.status === 'completed' ? 'success' : 
-                                  story.status === 'in-progress' ? 'warning' : 'secondary';
-                const statusText = story.status === 'completed' ? 'Abgeschlossen' : 
-                                 story.status === 'in-progress' ? 'In Bearbeitung' : 'Geplant';
-                
                 html += `
-                    <div class="border-bottom p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-2">
-                                    <i class="fas fa-clipboard-list text-info"></i> 
-                                    US-${story.number}: ${story.title}
-                                </h6>
-                                <div class="text-muted mb-2">
-                                    <strong>Als</strong> ${story.as || 'Administrator'}<br>
-                                    <strong>möchte ich</strong> ${story.want || story.description || 'Funktionalität'}<br>
-                                    <strong>damit</strong> ${story.so_that || 'der Workflow verbessert wird'}
-                                </div>
-                                <small class="text-info">
-                                    <i class="fas fa-layer-group"></i> Epic ${story.epic_number}: ${story.epic_title}
-                                </small>
-                            </div>
-                            <div class="ms-3 text-end">
-                                <span class="badge bg-${statusClass} mb-1">${statusText}</span><br>
-                                <small class="text-muted">${story.priority || 'niedrig'}</small>
-                            </div>
+                    <div class="d-flex align-items-center p-2 border-bottom">
+                        <div class="flex-grow-1">
+                            <strong class="text-primary">${story.id}</strong>
+                            <div class="text-muted small">${story.title}</div>
+                            <small class="text-info">${story.epic}</small>
                         </div>
-                        
-                        ${story.acceptance_criteria && story.acceptance_criteria.length > 0 ? `
-                            <div class="mt-3">
-                                <h6 class="text-muted mb-2">Akzeptanzkriterien:</h6>
-                                <ul class="list-unstyled mb-0">
-                                    ${story.acceptance_criteria.map(criteria => 
-                                        `<li><i class="fas fa-check text-success me-2"></i>${criteria}</li>`
-                                    ).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
+                        <div class="ms-2">
+                            <span class="badge bg-secondary">${story.status}</span>
+                        </div>
                     </div>
                 `;
             });
@@ -1260,6 +1155,129 @@ function createSimpleUserStoriesView(data) {
             html += '</div></div>';
         });
     }
+    
+    html += `
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rechts: Epics & Stories -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="fas fa-layer-group"></i> Epics & User Stories</h6>
+                    </div>
+                    <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
+    `;
+    
+    // Epics anzeigen
+    if (data.epics && data.epics.length > 0) {
+        data.epics.forEach(epic => {
+            html += `
+                <div class="border-bottom">
+                    <div class="p-3 bg-light">
+                        <h6 class="mb-2 text-success">
+                            <i class="fas fa-layer-group"></i> ${epic.title}
+                            <span class="badge bg-success ms-2">${epic.stories ? epic.stories.length : 0} Stories</span>
+                        </h6>
+                    </div>
+                    <div class="p-2">
+            `;
+            
+            if (epic.stories && epic.stories.length > 0) {
+                epic.stories.forEach(story => {
+                    const statusClass = story.status === 'completed' ? 'success' : 
+                                      story.status === 'in-progress' ? 'warning' : 'secondary';
+                    const statusText = story.status === 'completed' ? 'Abgeschlossen' : 
+                                     story.status === 'in-progress' ? 'In Bearbeitung' : 'Geplant';
+                    
+                    html += `
+                        <div class="p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-2 text-primary">
+                                        <i class="fas fa-clipboard-list"></i> ${story.id}: ${story.title}
+                                    </h6>
+                                    <div class="text-muted small mb-2">
+                                        <strong>Als</strong> ${story.as || 'Administrator'}<br>
+                                        <strong>möchte ich</strong> ${story.want || story.description || 'Funktionalität'}<br>
+                                        <strong>damit</strong> ${story.so_that || 'der Workflow verbessert wird'}
+                                    </div>
+                                </div>
+                                <div class="ms-3 text-end">
+                                    <span class="badge bg-${statusClass} mb-1">${statusText}</span>
+                                </div>
+                            </div>
+                            
+                            ${story.acceptance_criteria && story.acceptance_criteria.length > 0 ? `
+                                <div class="mt-2">
+                                    <h6 class="text-muted small mb-2">Akzeptanzkriterien:</h6>
+                                    <ul class="list-unstyled mb-0 small">
+                                        ${story.acceptance_criteria.map(criteria => 
+                                            `<li><i class="fas fa-check text-success me-2"></i>${criteria}</li>`
+                                        ).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div></div>';
+        });
+    }
+    
+    html += `
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Zusammenfassung unten -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-3">
+                                <div class="card bg-light">
+                                    <div class="card-body p-2">
+                                        <h5 class="text-primary">${data.total_epics || 0}</h5>
+                                        <small class="text-muted">Epics</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card bg-light">
+                                    <div class="card-body p-2">
+                                        <h5 class="text-success">${data.completed_stories || 0}</h5>
+                                        <small class="text-muted">Abgeschlossen</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card bg-light">
+                                    <div class="card-body p-2">
+                                        <h5 class="text-info">${data.total_stories || 0}</h5>
+                                        <small class="text-muted">Gesamt</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card bg-light">
+                                    <div class="card-body p-2">
+                                        <h5 class="text-warning">${data.progress_percentage || 0}%</h5>
+                                        <small class="text-muted">Fortschritt</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
     
     content.innerHTML = html;
 }

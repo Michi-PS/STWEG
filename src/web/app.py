@@ -487,14 +487,29 @@ def api_user_stories():
 
 @app.route('/api/user-stories/full')
 def api_user_stories_full():
-    """API: Vollständige User Stories-Daten mit allen Epics"""
+    """API: Vollständige User Stories-Daten mit allen Epics und Backlog"""
     try:
         from src.utils.markdown_parser import MarkdownParser
         parser = MarkdownParser(project_root)
+        
+        # User Stories aus USER_STORIES.md laden
         user_stories_data = parser.parse_user_stories()
         
         if 'error' in user_stories_data:
             return jsonify(user_stories_data), 404
+        
+        # Backlog-Daten aus ROADMAP.md laden
+        roadmap_data = parser.parse_roadmap()
+        
+        if 'error' not in roadmap_data:
+            # Backlog-Daten hinzufügen
+            user_stories_data['backlog'] = {
+                'priorities': roadmap_data.get('priorities', {}),
+                'status': roadmap_data.get('status', {}),
+                'total_stories': roadmap_data.get('total_stories', 0),
+                'completed_stories': roadmap_data.get('completed_stories', 0),
+                'progress_percentage': roadmap_data.get('progress_percentage', 0)
+            }
         
         return jsonify(user_stories_data)
             

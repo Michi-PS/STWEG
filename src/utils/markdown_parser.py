@@ -207,24 +207,21 @@ class MarkdownParser:
         
         return '\n'.join(section_lines)
     
-    def _extract_priorities(self, content: str) -> List[Dict[str, Any]]:
+    def _extract_priorities(self, content: str) -> Dict[str, List[Dict[str, Any]]]:
         """Extrahiert priorisierte User Stories aus der Roadmap"""
-        priorities = []
+        priorities = {
+            'kritisch': [],
+            'hoch': [],
+            'mittel': [],
+            'niedrig': []
+        }
         
-        # Einfache Extraktion: Suche nach User Stories mit einfacherem Pattern
         lines = content.split('\n')
         current_priority = None
-        current_stories = []
         
         for i, line in enumerate(lines):
             # Prioritäts-Header erkennen
             if line.startswith('## 🎯'):
-                if current_priority and current_stories:
-                    priorities.append({
-                        'name': current_priority,
-                        'stories': current_stories
-                    })
-                
                 # Neue Priorität bestimmen
                 if 'KRITISCH' in line.upper():
                     current_priority = 'kritisch'
@@ -235,24 +232,43 @@ class MarkdownParser:
                 elif 'NIEDRIG' in line.upper():
                     current_priority = 'niedrig'
                 else:
-                    current_priority = 'niedrig'
-                
-                current_stories = []
+                    current_priority = None
             
-            # User Story erkennen
-            elif line.startswith('### US-') and i < len(lines) - 1:
-                # Story-Details aus den nächsten Zeilen extrahieren
-                story_data = self._extract_story_from_lines(lines, i)
-                if story_data:
-                    story_data['priority'] = current_priority
-                    current_stories.append(story_data)
-        
-        # Abgeschlossene Stories hinzufügen
-        if current_priority and current_stories:
-            priorities.append({
-                'name': current_priority,
-                'stories': current_stories
-            })
+            # User Story ID erkennen (z.B. "- **US-008** - PDF-Rechnung generieren ⭐⭐⭐")
+            elif line.startswith('- **US-') and current_priority:
+                try:
+                    # Story-ID extrahieren
+                    story_id = line.split('**')[1]  # US-008
+                    
+                    # Titel extrahieren - alles nach dem zweiten "- " bis zu den Sternen
+                    parts = line.split(' - ')
+                    if len(parts) >= 3:
+                        story_title = parts[2].split(' ⭐')[0].strip()
+                    elif len(parts) >= 2:
+                        # Fallback: alles nach dem ersten "- " bis zu den Sternen
+                        story_title = parts[1].split(' ⭐')[0].strip()
+                    else:
+                        story_title = "Unbekannt"
+                    
+                    # Epic aus dem Kontext extrahieren (vorherige Zeilen)
+                    epic = "Unbekannt"
+                    for j in range(max(0, i-5), i):
+                        if lines[j].startswith('### ') and not lines[j].startswith('### US-'):
+                            epic = lines[j].replace('### ', '').strip()
+                            break
+                    
+                    story_data = {
+                        'id': story_id,
+                        'title': story_title,
+                        'epic': epic,
+                        'status': 'Geplant',
+                        'priority': current_priority
+                    }
+                    
+                    priorities[current_priority].append(story_data)
+                except Exception as e:
+                    print(f"Fehler beim Parsen der Zeile: {line}")
+                    continue
         
         return priorities
     

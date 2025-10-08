@@ -2,17 +2,19 @@
 
 ## Epic 1: Excel-File Analyse und Datenverarbeitung
 
+**Beschreibung:** Analyse und Verarbeitung von Excel-Dateien vom ZEV-Server für die Extraktion von Verbrauchsdaten und Strukturinformationen.
+
 ### US-001: Excel-File Struktur Analyse
 **Als** Administrator der Stockwerkeigentümergesellschaft  
 **möchte ich** die Struktur des Excel-Files vom ZEV-Server analysieren  
 **damit** ich verstehe, welche Daten verfügbar sind und wie sie strukturiert sind.
 
 **Akzeptanzkriterien:**
-- [ ] Excel-File kann geladen und gelesen werden
-- [ ] Alle Tabellenblätter werden identifiziert
-- [ ] Spaltenüberschriften werden extrahiert
-- [ ] Datenstruktur wird dokumentiert
-- [ ] Beispiel-Daten werden angezeigt
+- [x] Excel-File kann geladen und gelesen werden
+- [x] Alle Tabellenblätter werden identifiziert
+- [x] Spaltenüberschriften werden extrahiert
+- [x] Datenstruktur wird dokumentiert
+- [x] Beispiel-Daten werden angezeigt
 
 ### US-002: Datenvalidierung
 **Als** Administrator  
@@ -20,12 +22,16 @@
 **damit** ich sicherstellen kann, dass alle notwendigen Informationen vorhanden sind.
 
 **Akzeptanzkriterien:**
-- [ ] Überprüfung auf fehlende Spalten
-- [ ] Überprüfung auf leere oder ungültige Werte
-- [ ] Validierung der Datenformate
-- [ ] Fehlerbericht bei Problemen
+- [x] Überprüfung auf fehlende Spalten
+- [x] Überprüfung auf leere oder ungültige Werte
+- [x] Validierung der Datenformate
+- [x] Fehlerbericht bei Problemen
+
+---
 
 ## Epic 2: Stromkosten-Verwaltung
+
+**Beschreibung:** Auswertung und Aufteilung der Stromkosten basierend auf Verbrauchsdaten der einzelnen Messpunkte.
 
 ### US-003: Messpunkte auswerten
 **Als** Administrator  
@@ -49,7 +55,11 @@
 - [ ] Ergebnisse werden dokumentiert
 - [ ] Aufschlüsselung nach Zeiträumen
 
+---
+
 ## Epic 3: Nebenkosten-Verwaltung
+
+**Beschreibung:** Verwaltung aller sonstigen Nebenkosten durch PDF-Rechnungen, Jahresrechnungen und Kostenverteilung.
 
 ### US-005: PDF-Rechnungen verwalten
 **Als** Administrator  
@@ -84,7 +94,11 @@
 - [ ] Eigentümer-spezifische Aufschlüsselung
 - [ ] Nachvollziehbare Berechnung
 
+---
+
 ## Epic 4: Rechnungsstellung
+
+**Beschreibung:** Generierung und Versand von individuellen PDF-Rechnungen an alle Eigentümer.
 
 ### US-008: PDF-Rechnung generieren
 **Als** Administrator  
@@ -108,7 +122,11 @@
 - [ ] E-Mail-Template ist professionell
 - [ ] Versandbestätigung
 
+---
+
 ## Epic 5: Benutzeroberfläche
+
+**Beschreibung:** Benutzerfreundliche Web-Oberfläche für alle administrativen Funktionen.
 
 ### US-010: Web-Interface
 **Als** Administrator  
@@ -116,12 +134,16 @@
 **damit** ich alle Funktionen einfach bedienen kann.
 
 **Akzeptanzkriterien:**
-- [ ] Intuitive Navigation
-- [ ] Responsive Design
-- [ ] Upload-Funktionen
-- [ ] Übersichtliche Darstellung der Daten
+- [x] Intuitive Navigation
+- [x] Responsive Design
+- [x] Upload-Funktionen
+- [x] Übersichtliche Darstellung der Daten
+
+---
 
 ## Epic 6: System-Management
+
+**Beschreibung:** Datenbank-Integration und Benutzer-Management für sichere und kontrollierte Systemnutzung.
 
 ### US-011: Datenbank-Integration
 **Als** Administrator  
@@ -145,7 +167,11 @@
 - [ ] Passwort-Management
 - [ ] Audit-Log
 
+---
+
 ## Epic 7: Excel-Struktur-Validierung & Produktionssicherheit
+
+**Beschreibung:** Automatische Validierung von Excel-Dateien gegen bekannte Strukturen für Produktionssicherheit.
 
 ### US-013: Excel-Struktur-Validierung
 **Als** Administrator  
@@ -175,7 +201,11 @@
 - [ ] Historische Struktur-Änderungen verfolgen
 - [ ] Rollback-Möglichkeit bei Validierungsfehlern
 
+---
+
 ## Epic 8: UI-Modularisierung & Benutzerfreundlichkeit
+
+**Beschreibung:** Modulares Dashboard und verbesserte Benutzerfreundlichkeit für Entwicklungs- und Produktivitäts-Tools.
 
 ### US-015: Modulares Dashboard
 **Als** Administrator  
@@ -183,12 +213,12 @@
 **damit** ich zwischen produktiven Funktionen und Entwicklungs-Tools unterscheiden kann.
 
 **Akzeptanzkriterien:**
-- [ ] Sidebar-Navigation mit Modul-Auswahl
-- [ ] Excel-Analyse-Modul für produktive Funktionen
-- [ ] Development-Modul für Entwicklungs-Tools
-- [ ] Responsive Design für verschiedene Bildschirmgrößen
-- [ ] Modul-spezifische API-Endpunkte
-- [ ] State-Management zwischen Modulen
+- [x] Sidebar-Navigation mit Modul-Auswahl
+- [x] Excel-Analyse-Modul für produktive Funktionen
+- [x] Development-Modul für Entwicklungs-Tools
+- [x] Responsive Design für verschiedene Bildschirmgrößen
+- [x] Modul-spezifische API-Endpunkte
+- [x] State-Management zwischen Modulen
 
 ### US-016: Development-Dashboard
 **Als** Entwickler  
@@ -215,4 +245,3 @@
 - [x] Eigentümer deaktivieren/aktivieren
 - [x] Validierung der Eingabedaten
 - [ ] Änderungshistorie verfolgen
-
