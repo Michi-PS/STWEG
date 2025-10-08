@@ -40,7 +40,7 @@ class Eigentuemer(Base):
     
     # Beziehungen
     messpunkte = relationship("Messpunkt", back_populates="eigentuemer")
-    # zaehler = relationship("Zaehler", back_populates="eigentuemer")  # Temporär auskommentiert
+    zaehler = relationship("Zaehler", back_populates="eigentuemer")
     
     @property
     def verbrauchsdaten(self):

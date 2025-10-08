@@ -7,7 +7,7 @@ Repräsentiert Zähler aus dem ZEV-File, die später Eigentümern zugeordnet wer
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from models.database import Base
+from .database import Base
 
 
 class Zaehler(Base):
@@ -41,8 +41,7 @@ class Zaehler(Base):
     aktualisiert_am = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
     
     # Beziehungen
-    # eigentuemer = relationship("Eigentuemer", back_populates="zaehler")  # Temporär auskommentiert
-    # verbrauchsdaten = relationship("Verbrauchsdaten", back_populates="zaehler")  # Temporär auskommentiert
+    eigentuemer = relationship("Eigentuemer", back_populates="zaehler")
     
     def __repr__(self):
         return f"<Zaehler(id={self.id}, nr='{self.zaehler_nr}', bezeichnung='{self.bezeichnung}', typ='{self.typ}')>"
@@ -58,8 +57,7 @@ class Zaehler(Base):
     @property
     def eigentuemer_name(self):
         """Name des zugeordneten Eigentümers"""
-        # return self.eigentuemer.name if self.eigentuemer else "Nicht zugeordnet"  # Temporär auskommentiert
-        return "Nicht zugeordnet"  # Temporär
+        return self.eigentuemer.name if self.eigentuemer else "Nicht zugeordnet"
     
     @property
     def status_text(self):
@@ -67,7 +65,7 @@ class Zaehler(Base):
         if not self.aktiv:
             return "Inaktiv"
         elif self.ist_zugeordnet:
-            return f"Zugeordnet"  # Temporär ohne Name
+            return f"Zugeordnet ({self.eigentuemer_name})"
         else:
             return "Verfügbar"
     

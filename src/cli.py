@@ -64,10 +64,16 @@ def analyze_excel(args):
                     print(f"  - {error}")
     
     except FileNotFoundError:
-        print(f"Fehler: Datei nicht gefunden: {args.file}")
+        print(f"❌ Fehler: Datei nicht gefunden: {args.file}")
+        sys.exit(1)
+    except PermissionError:
+        print(f"❌ Fehler: Keine Berechtigung zum Lesen der Datei: {args.file}")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"❌ Validierungsfehler: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"Fehler: {e}")
+        print(f"❌ Unerwarteter Fehler: {e}")
         sys.exit(1)
 
 
@@ -86,8 +92,17 @@ def validate_excel(args):
                 print(f"  - {error}")
             sys.exit(1)
     
+    except FileNotFoundError:
+        print(f"❌ Fehler: Datei nicht gefunden: {args.file}")
+        sys.exit(1)
+    except PermissionError:
+        print(f"❌ Fehler: Keine Berechtigung zum Lesen der Datei: {args.file}")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"❌ Validierungsfehler: {e}")
+        sys.exit(1)
     except Exception as e:
-        print(f"Fehler: {e}")
+        print(f"❌ Unerwarteter Fehler: {e}")
         sys.exit(1)
 
 

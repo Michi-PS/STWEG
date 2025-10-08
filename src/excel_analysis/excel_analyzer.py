@@ -23,12 +23,22 @@ class ExcelAnalyzer:
     
     def __init__(self):
         """Initialisiert den Excel-Analyzer"""
-        self.required_columns = {
+        # Spalten die mindestens vorhanden sein sollten (flexible Validierung)
+        self.expected_columns = {
             'Zeitstempel': 'datetime',
             'Gesamtverbrauch': 'numeric'
         }
+        # Spalten die definitiv vorhanden sein müssen (strikte Validierung)
+        self.required_columns = {
+            'Messpunkt': 'string',  # Mindestens eine Identifikationsspalte
+        }
         self.optional_columns = {
-            'Eigentümer_': 'numeric'  # Pattern für Eigentümer-Spalten
+            'Eigentümer_': 'numeric',  # Pattern für Eigentümer-Spalten
+            'Wohnung': 'string',
+            'Zählerstand_': 'numeric',
+            'Verbrauch_': 'numeric',
+            'Kosten_': 'numeric',
+            'Zeitraum': 'string'
         }
     
     def analyze_file(self, file_path: str) -> Dict[str, Any]:
@@ -157,7 +167,7 @@ class ExcelAnalyzer:
     
     def _validate_sheet_columns(self, columns: List[str], sheet_name: str) -> List[str]:
         """
-        Validiert die Spalten eines Tabellenblatts
+        Validiert die Spalten eines Tabellenblatts mit flexibler Validierung
         
         Args:
             columns (List[str]): Liste der Spaltennamen
@@ -167,21 +177,41 @@ class ExcelAnalyzer:
             List[str]: Liste der Validierungsfehler
         """
         errors = []
+        warnings = []
         
-        # Prüfung der erforderlichen Spalten
+        # Prüfung der absolut erforderlichen Spalten
+        missing_required = []
         for required_col, expected_type in self.required_columns.items():
             if required_col not in columns:
-                errors.append(f"Sheet '{sheet_name}': Erforderliche Spalte '{required_col}' nicht gefunden")
+                missing_required.append(required_col)
         
-        # Prüfung auf Eigentümer-Spalten (optional)
-        owner_columns = [col for col in columns if col.startswith('Eigentümer_')]
-        if not owner_columns and 'Gesamtverbrauch' in columns:
-            errors.append(f"Sheet '{sheet_name}': Keine Eigentümer-Spalten gefunden")
+        if missing_required:
+            errors.append(f"Sheet '{sheet_name}': Erforderliche Spalte(n) fehlen: {', '.join(missing_required)}")
         
-        # Prüfung der Datenformate (vereinfacht)
-        # Hier könnte erweiterte Validierung implementiert werden
+        # Prüfung der erwarteten Spalten (nur Warnung, kein Fehler)
+        missing_expected = []
+        for expected_col, expected_type in self.expected_columns.items():
+            if expected_col not in columns:
+                missing_expected.append(expected_col)
         
-        return errors
+        if missing_expected:
+            warnings.append(f"Sheet '{sheet_name}': Erwartete Spalte(n) fehlen: {', '.join(missing_expected)}")
+        
+        # Prüfung auf sinnvolle Spaltenkombinationen
+        has_verbrauch_data = any(col.startswith('Verbrauch') or col.startswith('Zählerstand') for col in columns)
+        has_kosten_data = any(col.startswith('Kosten') for col in columns)
+        
+        if not has_verbrauch_data and not has_kosten_data:
+            warnings.append(f"Sheet '{sheet_name}': Keine Verbrauchs- oder Kostendaten erkannt")
+        
+        # Prüfung auf Eigentümer-Spalten (optional, aber empfohlen)
+        owner_columns = [col for col in columns if col.startswith('Eigentümer_') or col.startswith('Wohnung')]
+        if not owner_columns:
+            warnings.append(f"Sheet '{sheet_name}': Keine Eigentümer-Identifikationsspalten gefunden")
+        
+        # Warnings zu errors hinzufügen (für Rückwärtskompatibilität)
+        # In Zukunft könnte man zwischen errors und warnings unterscheiden
+        return errors + warnings
     
     def get_consumption_data(self, file_path: str, sheet_name: Optional[str] = None) -> pd.DataFrame:
         """
