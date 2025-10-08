@@ -196,10 +196,23 @@
 **damit** ich den Projektfortschritt und alle Entwicklungs-Informationen übersichtlich verwalten kann.
 
 **Akzeptanzkriterien:**
-- [ ] Vollständige Roadmap-Ansicht
-- [ ] User Stories-Übersicht mit Status
-- [ ] Live-Test-Status und Coverage
+- [x] Vollständige Roadmap-Ansicht
+- [x] User Stories-Übersicht mit Status
+- [x] Live-Test-Status und Coverage
 - [ ] Debug-Logs mit Filterung
-- [ ] API-Status-Monitoring
-- [ ] Entwicklungsfortschritt-Visualisierung
+- [x] API-Status-Monitoring
+- [x] Entwicklungsfortschritt-Visualisierung
+
+### US-017: Eigentümer-Daten-Management
+**Als** Administrator  
+**möchte ich** die Eigentümer-Daten im Web-Interface bearbeiten können  
+**damit** ich Änderungen an Adressen, Namen oder anderen Eigentümer-Informationen einfach verwalten kann.
+
+**Akzeptanzkriterien:**
+- [ ] Eigentümer-Liste im Dashboard anzeigen
+- [ ] Einzelne Eigentümer-Daten bearbeiten
+- [ ] Neue Eigentümer hinzufügen
+- [ ] Eigentümer deaktivieren/aktivieren
+- [ ] Validierung der Eingabedaten
+- [ ] Änderungshistorie verfolgen
 

@@ -51,10 +51,9 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link module-link disabled" href="#" data-module="pdf-billing">
+                            <a class="nav-link module-link" href="#" data-module="pdf-billing">
                                 <i class="fas fa-file-pdf text-danger"></i>
                                 PDF-Rechnungen
-                                <small class="text-muted">(Bald verfügbar)</small>
                             </a>
                         </li>
                     </ul>
@@ -428,6 +427,150 @@
                                     <div class="card-body">
                                         <div id="user-stories-content">
                                             <p class="text-muted">User Stories werden geladen...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PDF-Billing Modul -->
+                    <div id="pdf-billing-module" class="module-content" style="display: none;">
+                        <!-- Status Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Rechnungen</h6>
+                                                <h4 class="mb-0" id="pdf-invoices-count">-</h4>
+                                                <small class="text-muted" id="last-invoice">- generiert</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-file-pdf text-danger"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Template</h6>
+                                                <h4 class="mb-0">STWEG</h4>
+                                                <small class="text-muted">Standard-Vorlage</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-file-alt text-info"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Status</h6>
+                                                <h4 class="mb-0 text-success">Aktiv</h4>
+                                                <small class="text-muted">Bereit für Produktion</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-check-circle text-success"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Format</h6>
+                                                <h4 class="mb-0">PDF</h4>
+                                                <small class="text-muted">2-seitig</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-print text-warning"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PDF Generator -->
+                        <div class="row">
+                            <div class="col-lg-8 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-file-pdf text-danger"></i> PDF-Rechnungsgenerator
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <p class="text-muted">
+                                                Generiert professionelle Rechnungen basierend auf der STWEG-Vorlage mit Beispiel-Daten.
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <button type="button" class="btn btn-danger" onclick="generateSampleInvoice()">
+                                                <i class="fas fa-file-pdf"></i> Beispiel-Rechnung generieren
+                                            </button>
+                                            <button type="button" class="btn btn-outline-info ms-2" onclick="showInvoicePreview()">
+                                                <i class="fas fa-eye"></i> Vorlage anzeigen
+                                            </button>
+                                        </div>
+                                        
+                                        <div id="pdf-generation-result" class="mt-3" style="display: none;">
+                                            <div class="alert alert-success">
+                                                <h6><i class="fas fa-check-circle"></i> PDF erfolgreich generiert!</h6>
+                                                <p id="pdf-result-text" class="mb-2"></p>
+                                                <button type="button" class="btn btn-sm btn-success" id="download-pdf-btn" style="display: none;">
+                                                    <i class="fas fa-download"></i> PDF herunterladen
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rechnungs-Info -->
+                            <div class="col-lg-4 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-info-circle text-info"></i> Rechnungs-Informationen
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <h6>Vorlage-basierte Generierung:</h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-check text-success"></i> STWEG-Header und Logo</li>
+                                                <li><i class="fas fa-check text-success"></i> Eigentümer-Informationen</li>
+                                                <li><i class="fas fa-check text-success"></i> Strom- und Wasserkosten</li>
+                                                <li><i class="fas fa-check text-success"></i> Betriebskosten-Aufschlüsselung</li>
+                                                <li><i class="fas fa-check text-success"></i> Detailaufstellung (Seite 2)</li>
+                                                <li><i class="fas fa-check text-success"></i> Professionelles Layout</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="alert alert-info">
+                                            <small>
+                                                <i class="fas fa-info-circle"></i>
+                                                Die Beispiel-Rechnung verwendet realistische Test-Daten für die Demonstration.
+                                            </small>
                                         </div>
                                     </div>
                                 </div>

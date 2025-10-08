@@ -1,0 +1,126 @@
+{
+  "file_path": "/Users/rechberger/Documents/Coding/STWEG/data/sample/Rechnung.pdf",
+  "analysis_date": "2025-10-08T21:36:11.177635",
+  "pages": [
+    {
+      "page_number": 1,
+      "width": 595.2756,
+      "height": 841.8898,
+      "text": "STWEG\nZwischenbächen 115\n8048 Zürich\n[Name 1] & [Name 2]\n[Adresse]\n[PLZ] [Ort]\nZürich, [Datum]\nLiegenschaft: [Liegenschaft]\nEigentümer: [Name 1] & [Name 2]\nAbrechnungsperiode: [Abrechnungsperiode]\nWohnung: [Wohnung]\nStrom- und Wasserkosten\nAnteil Strom- und Wasserkosten [Anteil Strom/Wasserkosten]\n(gemäss separater Aufstellung)\nBetriebskosten\nBetriebskosten Liegenschaft [Betriebskosten]\nWertquote [Wertquote]\nAnteil Betriebskosten [Anteil Betriebskosten]\nTotal Nebenkosten [Total Nebenkosten]\nAkontozahlung geleistet [Akontozahlung]\nDi;erenz zu Gunsten von [STWEG]/ [Eigentümer:in] [DiVerenz]",
+      "tables": [],
+      "lines": []
+    },
+    {
+      "page_number": 2,
+      "width": 595.2756,
+      "height": 841.8898,
+      "text": "Abrechnung Strom- und Wasserkosten aus ZEV Zwischenbächen 115\nWohnung 1.3 Tanja & Michi 26P4 Wohnung 1.3\nPeriode Oktober 2023 - Dezember 2024\nStromverbrauch Netz/EWZ\nMenge [kWh] Promille [‰] Betrag [CHF]\nWohnung Hochtarif 1 ’004 3 7.69 5 51.64\nWohnung Niedertarif 6 29 1 4.98 2 19.28\nLadestation eMobilität Hochtarif 1 ’243 4 6.68 6 83.17\nLadestation eMobilität Niedertarif 1 ’254 2 9.88 4 37.29\nTotal Stromverbrauch Netz/EWZ 1 ’891.38\nStromverbrauch für Wärme (Heizung und Warmwasser)\nTotal [CHF] Promille [‰] (gemäss Neovac) Betrag [CHF]\nStromkosten aus Netz/EWZ 7 ’046.50 1 02 7 22.05\nStromkosten aus PV* 5 93.46 1 02 6 0.81\nTotal Stromverbrauch für Wärme (Heizung und Warmwasser) 7 82.86\nStromverbrauch aus PV\nMenge [kWh] Tarif PV [Rp.] Betrag [CHF]\nWohnung Hochtarif 4 44 1 6.40 7 2.79\nWohnung Niedertarif 9 8 1 6.40 1 6.06\nLadestation eMobilität Hochtarif 2 08 1 6.40 3 4.05\nLadestation eMobilität Niedertarif 6 8 1 6.40 1 1.16\nTotal Stromverbrauch aus PV* 1 34.07\nTotal Stromkosten (inkl. MwSt) 2 ’808.31\nDavon Einzahlung in Erneuerungsfond* 1 94.88\nWasserkosten September 2023 - September 2024\nGebäude gesamt [CHF] Promille [‰] (gemäss Neovac) Betrag [CHF]\nLeistungs- und Gebäudegebühr 517.18 1 15.14 5 9.55\nWasser-Verbrauch und -Entsorgung 812.5 1 15.14 9 3.55\nTotal Wasserkosten 9 3.55\nTotal Strom- und Wasserkosten (inkl. MwSt) 2 ’901.86\nDavon Einzahlung in Erneuerungsfond* 1 94.88\nHochtarif Mo - Sa, 6-22 Uhr\nNiedertarif übrige Zeit\n* Stromkosten für Strom aus PV wird in Erneuerungsfond eingezahlt und ist damit steuerlich abzugsfähig",
+      "tables": [
+        {
+          "table_number": 1,
+          "rows": 2,
+          "columns": 1,
+          "content": [
+            [
+              "Stromverbrauch Netz/EWZ\nMenge [kWh] Promille [‰] Betrag [CHF]\nWohnung Hochtarif 1 ’004 3 7.69 5 51.64\nWohnung Niedertarif 6 29 1 4.98 2 19.28\nLadestation eMobilität Hochtarif 1 ’243 4 6.68 6 83.17\nLadestation eMobilität Niedertarif 1 ’254 2 9.88 4 37.29"
+            ],
+            [
+              "Total Stromverbrauch Netz/EWZ 1 ’891.38"
+            ]
+          ]
+        },
+        {
+          "table_number": 2,
+          "rows": 2,
+          "columns": 1,
+          "content": [
+            [
+              "Stromverbrauch für Wärme (Heizung und Warmwasser)\nTotal [CHF] Promille [‰] (gemäss Neovac) Betrag [CHF]\nStromkosten aus Netz/EWZ 7 ’046.50 1 02 7 22.05\nStromkosten aus PV* 5 93.46 1 02 6 0.81"
+            ],
+            [
+              "Total Stromverbrauch für Wärme (Heizung und Warmwasser) 7 82.86"
+            ]
+          ]
+        },
+        {
+          "table_number": 3,
+          "rows": 2,
+          "columns": 1,
+          "content": [
+            [
+              "Stromverbrauch aus PV\nMenge [kWh] Tarif PV [Rp.] Betrag [CHF]\nWohnung Hochtarif 4 44 1 6.40 7 2.79\nWohnung Niedertarif 9 8 1 6.40 1 6.06\nLadestation eMobilität Hochtarif 2 08 1 6.40 3 4.05\nLadestation eMobilität Niedertarif 6 8 1 6.40 1 1.16"
+            ],
+            [
+              "Total Stromverbrauch aus PV* 1 34.07"
+            ]
+          ]
+        },
+        {
+          "table_number": 4,
+          "rows": 2,
+          "columns": 1,
+          "content": [
+            [
+              "Total Stromkosten (inkl. MwSt) 2 ’808.31"
+            ],
+            [
+              "Davon Einzahlung in Erneuerungsfond* 1 94.88"
+            ]
+          ]
+        },
+        {
+          "table_number": 5,
+          "rows": 2,
+          "columns": 1,
+          "content": [
+            [
+              "Wasserkosten September 2023 - September 2024\nGebäude gesamt [CHF] Promille [‰] (gemäss Neovac) Betrag [CHF]\nLeistungs- und Gebäudegebühr 517.18 1 15.14 5 9.55\nWasser-Verbrauch und -Entsorgung 812.5 1 15.14 9 3.55"
+            ],
+            [
+              "Total Wasserkosten 9 3.55"
+            ]
+          ]
+        },
+        {
+          "table_number": 6,
+          "rows": 2,
+          "columns": 1,
+          "content": [
+            [
+              "Total Strom- und Wasserkosten (inkl. MwSt) 2 ’901.86"
+            ],
+            [
+              "Davon Einzahlung in Erneuerungsfond* 1 94.88"
+            ]
+          ]
+        }
+      ],
+      "lines": []
+    }
+  ],
+  "text_content": [
+    "STWEG\nZwischenbächen 115\n8048 Zürich\n[Name 1] & [Name 2]\n[Adresse]\n[PLZ] [Ort]\nZürich, [Datum]\nLiegenschaft: [Liegenschaft]\nEigentümer: [Name 1] & [Name 2]\nAbrechnungsperiode: [Abrechnungsperiode]\nWohnung: [Wohnung]\nStrom- und Wasserkosten\nAnteil Strom- und Wasserkosten [Anteil Strom/Wasserkosten]\n(gemäss separater Aufstellung)\nBetriebskosten\nBetriebskosten Liegenschaft [Betriebskosten]\nWertquote [Wertquote]\nAnteil Betriebskosten [Anteil Betriebskosten]\nTotal Nebenkosten [Total Nebenkosten]\nAkontozahlung geleistet [Akontozahlung]\nDi;erenz zu Gunsten von [STWEG]/ [Eigentümer:in] [DiVerenz]",
+    "Abrechnung Strom- und Wasserkosten aus ZEV Zwischenbächen 115\nWohnung 1.3 Tanja & Michi 26P4 Wohnung 1.3\nPeriode Oktober 2023 - Dezember 2024\nStromverbrauch Netz/EWZ\nMenge [kWh] Promille [‰] Betrag [CHF]\nWohnung Hochtarif 1 ’004 3 7.69 5 51.64\nWohnung Niedertarif 6 29 1 4.98 2 19.28\nLadestation eMobilität Hochtarif 1 ’243 4 6.68 6 83.17\nLadestation eMobilität Niedertarif 1 ’254 2 9.88 4 37.29\nTotal Stromverbrauch Netz/EWZ 1 ’891.38\nStromverbrauch für Wärme (Heizung und Warmwasser)\nTotal [CHF] Promille [‰] (gemäss Neovac) Betrag [CHF]\nStromkosten aus Netz/EWZ 7 ’046.50 1 02 7 22.05\nStromkosten aus PV* 5 93.46 1 02 6 0.81\nTotal Stromverbrauch für Wärme (Heizung und Warmwasser) 7 82.86\nStromverbrauch aus PV\nMenge [kWh] Tarif PV [Rp.] Betrag [CHF]\nWohnung Hochtarif 4 44 1 6.40 7 2.79\nWohnung Niedertarif 9 8 1 6.40 1 6.06\nLadestation eMobilität Hochtarif 2 08 1 6.40 3 4.05\nLadestation eMobilität Niedertarif 6 8 1 6.40 1 1.16\nTotal Stromverbrauch aus PV* 1 34.07\nTotal Stromkosten (inkl. MwSt) 2 ’808.31\nDavon Einzahlung in Erneuerungsfond* 1 94.88\nWasserkosten September 2023 - September 2024\nGebäude gesamt [CHF] Promille [‰] (gemäss Neovac) Betrag [CHF]\nLeistungs- und Gebäudegebühr 517.18 1 15.14 5 9.55\nWasser-Verbrauch und -Entsorgung 812.5 1 15.14 9 3.55\nTotal Wasserkosten 9 3.55\nTotal Strom- und Wasserkosten (inkl. MwSt) 2 ’901.86\nDavon Einzahlung in Erneuerungsfond* 1 94.88\nHochtarif Mo - Sa, 6-22 Uhr\nNiedertarif übrige Zeit\n* Stromkosten für Strom aus PV wird in Erneuerungsfond eingezahlt und ist damit steuerlich abzugsfähig"
+  ],
+  "structure": {
+    "identifiable_fields": {
+      "rechnungsnummer": "Rechnung",
+      "datum": "Datum",
+      "empfaenger": "An",
+      "absender": "Von",
+      "betrag": "Betrag",
+      "steuer": "MwSt"
+    },
+    "keywords": [
+      "rechnung",
+      "nebenkosten",
+      "eigentümer",
+      "verbrauch",
+      "strom",
+      "heizung"
+    ],
+    "sections": [
+      "STWEG\nZwischenbächen 115\n8048 Zürich\n[Name 1] & [Name 2]\n[Adresse]\n[PLZ] [Ort]\nZürich, [Datum]\nLiegenschaft: [Liegenschaft]\nEigentümer: [Name 1] & [Name 2]\nAbrechnungsperiode: [Abrechnungsperiode]\nWohnung: [Wohnung]\nStrom- und Wasserkosten\nAnteil Strom- und Wasserkosten [Anteil Strom/Wasserkosten]\n(gemäss separater Aufstellung)\nBetriebskosten\nBetriebskosten Liegenschaft [Betriebskosten]\nWertquote [Wertquote]\nAnteil Betriebskosten [Anteil Betriebskosten]\nTotal Nebenkosten [Total Nebenkosten]\nAkontozahlung geleistet [Akontozahlung]\nDi;erenz zu Gunsten von [STWEG]/ [Eigentümer:in] [DiVerenz]\nAbrechnung Strom- und Wasserkosten aus ZEV Zwischenbächen 115\nWohnung 1.3 Tanja & Michi 26P4 Wohnung 1.3\nPeriode Oktober 2023 - Dezember 2024\nStromverbrauch Netz/EWZ\nMenge [kWh] Promille [‰] Betrag [CHF]\nWohnung Hochtarif 1 ’004 3 7.69 5 51.64\nWohnung Niedertarif 6 29 1 4.98 2 19.28\nLadestation eMobilität Hochtarif 1 ’243 4 6.68 6 83.17\nLadestation eMobilität Niedertarif 1 ’254 2 9.88 4 37.29\nTotal Stromverbrauch Netz/EWZ 1 ’891.38\nStromverbrauch für Wärme (Heizung und Warmwasser)\nTotal [CHF] Promille [‰] (gemäss Neovac) Betrag [CHF]\nStromkosten aus Netz/EWZ 7 ’046.50 1 02 7 22.05\nStromkosten aus PV* 5 93.46 1 02 6 0.81\nTotal Stromverbrauch für Wärme (Heizung und Warmwasser) 7 82.86\nStromverbrauch aus PV\nMenge [kWh] Tarif PV [Rp.] Betrag [CHF]\nWohnung Hochtarif 4 44 1 6.40 7 2.79\nWohnung Niedertarif 9 8 1 6.40 1 6.06\nLadestation eMobilität Hochtarif 2 08 1 6.40 3 4.05\nLadestation eMobilität Niedertarif 6 8 1 6.40 1 1.16\nTotal Stromverbrauch aus PV* 1 34.07\nTotal Stromkosten (inkl. MwSt) 2 ’808.31\nDavon Einzahlung in Erneuerungsfond* 1 94.88\nWasserkosten September 2023 - September 2024\nGebäude gesamt [CHF] Promille [‰] (gemäss Neovac) Betrag [CHF]\nLeistungs- und Gebäudegebühr 517.18 1 15.14 5 9.55\nWasser-Verbrauch und -Entsorgung 812.5 1 15.14 9 3.55\nTotal Wasserkosten 9 3.55\nTotal Strom- und Wasserkosten (inkl. MwSt) 2 ’901.86\nDavon Einzahlung in Erneuerungsfond* 1 94.88\nHochtarif Mo - Sa, 6-22 Uhr\nNiedertarif übrige Zeit\n* Stromkosten für Strom aus PV wird in Erneuerungsfond eingezahlt und ist damit steuerlich abzugsfähig"
+    ]
+  }
+}

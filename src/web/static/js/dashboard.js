@@ -47,11 +47,17 @@ function initializeModuleSystem() {
     
     // Modul-Links mit Event-Listeners versehen
     const moduleLinks = document.querySelectorAll('.module-link');
-    moduleLinks.forEach(link => {
+    console.log(`📋 Gefundene Modul-Links: ${moduleLinks.length}`);
+    
+    moduleLinks.forEach((link, index) => {
+        const moduleName = link.getAttribute('data-module');
+        console.log(`🔗 Link ${index + 1}: ${moduleName}`);
+        
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const module = this.getAttribute('data-module');
-            if (module && module !== 'pdf-billing') { // PDF-Billing ist noch disabled
+            console.log(`🖱️ Klick auf Modul: ${module}`);
+            if (module) {
                 switchModule(module);
             }
         });
@@ -728,12 +734,18 @@ function switchModule(moduleName) {
     const currentModuleElement = document.getElementById(`${currentModule}-module`);
     if (currentModuleElement) {
         currentModuleElement.style.display = 'none';
+        console.log(`✅ Aktuelles Modul versteckt: ${currentModule}`);
+    } else {
+        console.log(`❌ Aktuelles Modul nicht gefunden: ${currentModule}`);
     }
     
     // Neues Modul anzeigen
     const newModuleElement = document.getElementById(`${moduleName}-module`);
     if (newModuleElement) {
         newModuleElement.style.display = 'block';
+        console.log(`✅ Neues Modul angezeigt: ${moduleName}`);
+    } else {
+        console.log(`❌ Neues Modul nicht gefunden: ${moduleName}`);
     }
     
     // Sidebar-Links aktualisieren
@@ -751,7 +763,7 @@ function switchModule(moduleName) {
         const titles = {
             'excel-analysis': 'Excel-Analyse & Kostenaufteilung',
             'development': 'Development & Monitoring',
-            'pdf-billing': 'PDF-Rechnungen'
+            'pdf-billing': 'PDF-Rechnungen & Billing'
         };
         moduleTitle.textContent = titles[moduleName] || moduleName;
     }
@@ -781,8 +793,8 @@ async function loadModuleData(moduleName) {
             await loadDevelopmentModuleData();
             break;
         case 'pdf-billing':
-            // PDF-Billing-spezifische Daten laden (wenn verfügbar)
-            console.log('📄 PDF-Billing-Modul noch nicht implementiert');
+            // PDF-Billing-spezifische Daten laden
+            await loadPDFBillingModuleData();
             break;
     }
 }
@@ -1102,6 +1114,114 @@ function createSimpleUserStoriesView(data) {
     }
     
     content.innerHTML = html;
+}
+
+/**
+ * PDF-Billing-Modul-Daten laden
+ */
+async function loadPDFBillingModuleData() {
+    console.log('📄 Lade PDF-Billing-Modul-Daten...');
+    
+    try {
+        // PDF-Statistiken laden (falls verfügbar)
+        const invoicesResponse = await fetch('/api/billing/status');
+        if (invoicesResponse.ok) {
+            const invoicesData = await invoicesResponse.json();
+            updatePDFBillingModuleData(invoicesData);
+        }
+        
+    } catch (error) {
+        console.log('ℹ️ PDF-Billing-Modul-APIs noch nicht vollständig implementiert');
+    }
+}
+
+/**
+ * PDF-Billing-Modul-Daten aktualisieren
+ */
+function updatePDFBillingModuleData(data) {
+    // PDF-spezifische UI-Elemente aktualisieren
+    if (data.invoices_count !== undefined) {
+        document.getElementById('pdf-invoices-count').textContent = data.invoices_count;
+    }
+    if (data.last_invoice) {
+        document.getElementById('last-invoice').textContent = data.last_invoice;
+    }
+}
+
+/**
+ * Beispiel-Rechnung generieren
+ */
+async function generateSampleInvoice() {
+    console.log('📄 Generiere Beispiel-Rechnung...');
+    
+    const resultDiv = document.getElementById('pdf-generation-result');
+    const resultText = document.getElementById('pdf-result-text');
+    const downloadBtn = document.getElementById('download-pdf-btn');
+    
+    // Loading-State
+    resultText.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Generiere PDF...</span>
+            </div>
+            <span class="ms-2">Generiere PDF-Rechnung...</span>
+        </div>
+    `;
+    resultDiv.style.display = 'block';
+    downloadBtn.style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/billing/generate-sample', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            resultText.innerHTML = `
+                <strong>PDF erfolgreich generiert!</strong><br>
+                <small class="text-muted">Datei: ${data.filename}</small>
+            `;
+            
+            // Download-Button konfigurieren
+            downloadBtn.onclick = () => {
+                window.open(data.download_url, '_blank');
+            };
+            downloadBtn.style.display = 'inline-block';
+            
+            // Modul-Daten aktualisieren
+            setTimeout(() => {
+                loadPDFBillingModuleData();
+            }, 1000);
+            
+        } else {
+            resultText.innerHTML = `
+                <div class="text-danger">
+                    <strong>Fehler:</strong> ${data.error}
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultText.innerHTML = `
+            <div class="text-danger">
+                <strong>Netzwerk-Fehler:</strong> ${error.message}
+            </div>
+        `;
+    }
+}
+
+/**
+ * Rechnungsvorlage anzeigen
+ */
+function showInvoicePreview() {
+    console.log('👁️ Zeige Rechnungsvorlage...');
+    
+    // Öffne die Original-Vorlage in einem neuen Tab
+    const templateUrl = '/data/sample/Rechnung.pdf';
+    window.open(templateUrl, '_blank');
 }
 
 /**

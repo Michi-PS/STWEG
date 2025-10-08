@@ -21,6 +21,7 @@ from flask_cors import CORS
 from src.models.models import Base, Eigentuemer, Messpunkt, Verbrauchsdaten, Rechnung
 from src.models.database import get_db_session, create_tables
 from src.excel_analysis.excel_analyzer import ExcelAnalyzer
+from src.billing.pdf_generator import STWEGPDFGenerator
 
 app = Flask(__name__)
 CORS(app)
@@ -496,6 +497,74 @@ def api_user_stories_full():
         
         return jsonify(user_stories_data)
             
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/billing/generate-sample', methods=['POST'])
+def api_billing_generate_sample():
+    """API: Beispiel-Rechnung generieren"""
+    try:
+        generator = STWEGPDFGenerator()
+        output_file = generator.generate_sample_invoice()
+        
+        # Datei für Download vorbereiten
+        filename = Path(output_file).name
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'filepath': output_file,
+            'download_url': f'/api/billing/download/{filename}'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/billing/download/<filename>')
+def api_billing_download(filename):
+    """API: Generierte Rechnung herunterladen"""
+    try:
+        file_path = EXPORT_FOLDER / 'invoices' / filename
+        
+        if not file_path.exists():
+            return jsonify({'error': 'Datei nicht gefunden'}), 404
+        
+        return send_file(
+            str(file_path),
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/billing/status')
+def api_billing_status():
+    """API: PDF-Billing-Status"""
+    try:
+        # PDF-Dateien zählen
+        invoices_folder = EXPORT_FOLDER / 'invoices'
+        invoices_folder.mkdir(parents=True, exist_ok=True)
+        
+        pdf_files = list(invoices_folder.glob('*.pdf'))
+        
+        # Letzte Generierung
+        last_invoice = None
+        if pdf_files:
+            last_file = max(pdf_files, key=lambda f: f.stat().st_mtime)
+            last_invoice = datetime.fromtimestamp(last_file.stat().st_mtime).strftime('%d.%m.%Y %H:%M')
+        
+        return jsonify({
+            'invoices_count': len(pdf_files),
+            'last_invoice': last_invoice,
+            'template_available': True,
+            'status': 'active'
+        })
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
