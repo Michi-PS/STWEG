@@ -953,13 +953,13 @@ function updateUserStoriesContent(data) {
 }
 
 /**
- * Einfache Roadmap-Ansicht erstellen
+ * Priorisiertes Backlog anzeigen (ersetzt die alte Roadmap-Ansicht)
  */
 function createSimpleRoadmapView(data) {
     const content = document.getElementById('roadmap-content');
     
     if (!data || data.error) {
-        content.innerHTML = '<p class="text-danger">Fehler beim Laden der Roadmap-Daten</p>';
+        content.innerHTML = '<p class="text-danger">Fehler beim Laden der Backlog-Daten</p>';
         return;
     }
     
@@ -968,15 +968,15 @@ function createSimpleRoadmapView(data) {
             <div class="col-4">
                 <div class="card bg-light">
                     <div class="card-body p-2">
-                        <h5 class="text-primary">${data.total_phases || 0}</h5>
-                        <small class="text-muted">Phasen</small>
+                        <h5 class="text-primary">${data.total_stories || 0}</h5>
+                        <small class="text-muted">User Stories</small>
                     </div>
                 </div>
             </div>
             <div class="col-4">
                 <div class="card bg-light">
                     <div class="card-body p-2">
-                        <h5 class="text-success">${data.completed_phases || 0}</h5>
+                        <h5 class="text-success">${data.completed_stories || 0}</h5>
                         <small class="text-muted">Abgeschlossen</small>
                     </div>
                 </div>
@@ -984,45 +984,97 @@ function createSimpleRoadmapView(data) {
             <div class="col-4">
                 <div class="card bg-light">
                     <div class="card-body p-2">
-                        <h5 class="text-info">${data.status?.progress_percentage || 0}%</h5>
+                        <h5 class="text-info">${data.progress_percentage || 0}%</h5>
                         <small class="text-muted">Fortschritt</small>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <div class="progress mb-3" style="height: 20px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: ${data.progress_percentage || 0}%">
+                ${data.progress_percentage || 0}%
+            </div>
+        </div>
     `;
     
-    if (data.status?.current_phase) {
-        html += `<div class="alert alert-info mb-3"><strong>Aktuelle Phase:</strong> ${data.status.current_phase}</div>`;
-    }
+    // Priorisiertes Backlog anzeigen
+    html += '<h6 class="mb-3"><i class="fas fa-list-ol text-primary"></i> Priorisiertes Backlog:</h6>';
     
-    if (data.phases && data.phases.length > 0) {
-        html += '<h6>Alle Phasen:</h6>';
-        data.phases.forEach(phase => {
-            const statusIcon = getPhaseStatusIcon(phase.status);
-            const statusClass = getPhaseStatusClass(phase.status);
+    if (data.priorities && data.priorities.length > 0) {
+        data.priorities.forEach(priority => {
+            if (!priority.stories || priority.stories.length === 0) return;
+            
+            const priorityColors = {
+                'kritisch': 'danger',
+                'hoch': 'warning', 
+                'mittel': 'info',
+                'niedrig': 'secondary',
+                'abgeschlossen': 'success'
+            };
+            
+            const priorityIcons = {
+                'kritisch': 'fas fa-exclamation-triangle',
+                'hoch': 'fas fa-arrow-up',
+                'mittel': 'fas fa-minus',
+                'niedrig': 'fas fa-arrow-down',
+                'abgeschlossen': 'fas fa-check-circle'
+            };
             
             html += `
-                <div class="card mb-2">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="mb-1">
-                                    <span class="me-2">${statusIcon}</span>
-                                    <strong>Phase ${phase.number}:</strong> ${phase.title}
-                                </h6>
-                                <span class="badge ${statusClass}">${phase.status}</span>
-                            </div>
-                        </div>
+                <div class="card mb-4">
+                    <div class="card-header bg-${priorityColors[priority.name]} text-white">
+                        <h6 class="mb-0">
+                            <i class="${priorityIcons[priority.name]}"></i> 
+                            Priorität ${priority.name.charAt(0).toUpperCase() + priority.name.slice(1)}
+                            <span class="badge bg-light text-dark ms-2">${priority.stories.length} Stories</span>
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
             `;
             
-            if (phase.sprints && phase.sprints.length > 0) {
-                html += '<div class="mt-2"><small class="text-muted">Sprints:</small><ul class="mb-0 mt-1">';
-                phase.sprints.forEach(sprint => {
-                    html += `<li><small>Sprint ${sprint.number}: ${sprint.title}</small></li>`;
-                });
-                html += '</ul></div>';
-            }
+            priority.stories.forEach(story => {
+                const statusClass = story.status === 'completed' ? 'success' : 
+                                  story.status === 'in-progress' ? 'warning' : 'secondary';
+                const statusText = story.status === 'completed' ? 'Abgeschlossen' : 
+                                 story.status === 'in-progress' ? 'In Bearbeitung' : 'Geplant';
+                
+                html += `
+                    <div class="border-bottom p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-clipboard-list text-info"></i> 
+                                    ${story.title}
+                                </h6>
+                                <div class="text-muted mb-2">
+                                    <strong>Als</strong> ${story.as}<br>
+                                    <strong>möchte ich</strong> ${story.want}<br>
+                                    <strong>damit</strong> ${story.so_that}
+                                </div>
+                                <small class="text-info">
+                                    <i class="fas fa-layer-group"></i> ${story.epic}
+                                </small>
+                            </div>
+                            <div class="ms-3 text-end">
+                                <span class="badge bg-${statusClass} mb-1">${statusText}</span><br>
+                                <small class="text-muted">${story.priority}</small>
+                            </div>
+                        </div>
+                        
+                        ${story.acceptance_criteria && story.acceptance_criteria.length > 0 ? `
+                            <div class="mt-3">
+                                <h6 class="text-muted mb-2">Akzeptanzkriterien:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    ${story.acceptance_criteria.map(criteria => 
+                                        `<li><i class="fas fa-check text-success me-2"></i>${criteria}</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
             
             html += '</div></div>';
         });
@@ -1032,7 +1084,7 @@ function createSimpleRoadmapView(data) {
 }
 
 /**
- * Einfache User Stories-Ansicht erstellen
+ * Verbesserte User Stories-Ansicht mit vollständigem Text und priorisiertem Backlog
  */
 function createSimpleUserStoriesView(data) {
     const content = document.getElementById('user-stories-content');
@@ -1077,42 +1129,133 @@ function createSimpleUserStoriesView(data) {
         </div>
     `;
     
+    // Priorisiertes Backlog anzeigen
+    html += '<h6 class="mb-3"><i class="fas fa-list-ol text-primary"></i> Priorisiertes Backlog:</h6>';
+    
     if (data.epics && data.epics.length > 0) {
-        html += '<h6>Alle Epics:</h6>';
+        // Alle Stories sammeln und nach Priorität sortieren
+        let allStories = [];
         data.epics.forEach(epic => {
-            const completedCount = epic.stories ? epic.stories.filter(s => s.status === 'completed').length : 0;
-            const totalCount = epic.stories ? epic.stories.length : 0;
-            
-            html += `
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <strong>Epic ${epic.number}: ${epic.title}</strong>
-                            <span class="badge bg-info">${completedCount}/${totalCount} Stories</span>
-                        </div>
-                    </div>
-                    <div class="card-body">
-            `;
-            
             if (epic.stories && epic.stories.length > 0) {
                 epic.stories.forEach(story => {
-                    const statusIcon = story.status === 'completed' ? '✅' : '📋';
-                    const statusClass = story.status === 'completed' ? 'text-success' : 'text-muted';
-                    
-                    html += `
-                        <div class="d-flex align-items-start mb-3 p-3 bg-light rounded">
-                            <span class="me-3 fs-4">${statusIcon}</span>
+                    allStories.push({
+                        ...story,
+                        epic_title: epic.title,
+                        epic_number: epic.number
+                    });
+                });
+            }
+        });
+        
+        // Nach Priorität und Status sortieren
+        const priorityOrder = { 'kritisch': 1, 'hoch': 2, 'mittel': 3, 'niedrig': 4 };
+        const statusOrder = { 'completed': 5, 'in-progress': 1, 'planned': 2 };
+        
+        allStories.sort((a, b) => {
+            if (a.status === 'completed' && b.status !== 'completed') return 1;
+            if (b.status === 'completed' && a.status !== 'completed') return -1;
+            
+            const aPriority = priorityOrder[a.priority] || 5;
+            const bPriority = priorityOrder[b.priority] || 5;
+            if (aPriority !== bPriority) return aPriority - bPriority;
+            
+            return (statusOrder[a.status] || 3) - (statusOrder[b.status] || 3);
+        });
+        
+        // Stories nach Priorität gruppieren
+        const priorityGroups = {
+            'kritisch': [],
+            'hoch': [],
+            'mittel': [],
+            'niedrig': [],
+            'abgeschlossen': []
+        };
+        
+        allStories.forEach(story => {
+            if (story.status === 'completed') {
+                priorityGroups.abgeschlossen.push(story);
+            } else {
+                const priority = story.priority || 'niedrig';
+                if (priorityGroups[priority]) {
+                    priorityGroups[priority].push(story);
+                }
+            }
+        });
+        
+        // Prioritätsgruppen anzeigen
+        Object.entries(priorityGroups).forEach(([priority, stories]) => {
+            if (stories.length === 0) return;
+            
+            const priorityColors = {
+                'kritisch': 'danger',
+                'hoch': 'warning', 
+                'mittel': 'info',
+                'niedrig': 'secondary',
+                'abgeschlossen': 'success'
+            };
+            
+            const priorityIcons = {
+                'kritisch': 'fas fa-exclamation-triangle',
+                'hoch': 'fas fa-arrow-up',
+                'mittel': 'fas fa-minus',
+                'niedrig': 'fas fa-arrow-down',
+                'abgeschlossen': 'fas fa-check-circle'
+            };
+            
+            html += `
+                <div class="card mb-4">
+                    <div class="card-header bg-${priorityColors[priority]} text-white">
+                        <h6 class="mb-0">
+                            <i class="${priorityIcons[priority]}"></i> 
+                            Priorität ${priority.charAt(0).toUpperCase() + priority.slice(1)}
+                            <span class="badge bg-light text-dark ms-2">${stories.length} Stories</span>
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+            `;
+            
+            stories.forEach(story => {
+                const statusClass = story.status === 'completed' ? 'success' : 
+                                  story.status === 'in-progress' ? 'warning' : 'secondary';
+                const statusText = story.status === 'completed' ? 'Abgeschlossen' : 
+                                 story.status === 'in-progress' ? 'In Bearbeitung' : 'Geplant';
+                
+                html += `
+                    <div class="border-bottom p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
                             <div class="flex-grow-1">
-                                <strong class="${statusClass} fs-6">US-${story.number}:</strong>
-                                <div class="fw-bold mb-2">${story.title}</div>
-                                ${story.description ? `<div class="text-muted">${story.description}</div>` : ''}
+                                <h6 class="mb-2">
+                                    <i class="fas fa-clipboard-list text-info"></i> 
+                                    US-${story.number}: ${story.title}
+                                </h6>
+                                <div class="text-muted mb-2">
+                                    <strong>Als</strong> ${story.as || 'Administrator'}<br>
+                                    <strong>möchte ich</strong> ${story.want || story.description || 'Funktionalität'}<br>
+                                    <strong>damit</strong> ${story.so_that || 'der Workflow verbessert wird'}
+                                </div>
+                                <small class="text-info">
+                                    <i class="fas fa-layer-group"></i> Epic ${story.epic_number}: ${story.epic_title}
+                                </small>
+                            </div>
+                            <div class="ms-3 text-end">
+                                <span class="badge bg-${statusClass} mb-1">${statusText}</span><br>
+                                <small class="text-muted">${story.priority || 'niedrig'}</small>
                             </div>
                         </div>
-                    `;
-                });
-            } else {
-                html += '<p class="text-muted mb-0">Keine User Stories gefunden</p>';
-            }
+                        
+                        ${story.acceptance_criteria && story.acceptance_criteria.length > 0 ? `
+                            <div class="mt-3">
+                                <h6 class="text-muted mb-2">Akzeptanzkriterien:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    ${story.acceptance_criteria.map(criteria => 
+                                        `<li><i class="fas fa-check text-success me-2"></i>${criteria}</li>`
+                                    ).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
             
             html += '</div></div>';
         });

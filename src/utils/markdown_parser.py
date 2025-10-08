@@ -15,7 +15,7 @@ class MarkdownParser:
         self.project_root = project_root
     
     def parse_roadmap(self) -> Dict[str, Any]:
-        """Parse ROADMAP.md in strukturierte Daten"""
+        """Parse ROADMAP.md als priorisiertes Backlog"""
         roadmap_file = self.project_root / 'ROADMAP.md'
         
         if not roadmap_file.exists():
@@ -24,21 +24,18 @@ class MarkdownParser:
         with open(roadmap_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Phasen extrahieren
-        phases = self._extract_phases(content)
+        # Priorisierte User Stories extrahieren
+        priorities = self._extract_priorities(content)
         
-        # Milestones extrahieren
-        milestones = self._extract_milestones(content)
-        
-        # Status extrahieren
-        status = self._extract_status(content)
+        # Status und Metriken extrahieren
+        status = self._extract_backlog_status(content)
         
         return {
-            'phases': phases,
-            'milestones': milestones,
+            'priorities': priorities,
             'status': status,
-            'total_phases': len(phases),
-            'completed_phases': len([p for p in phases if p.get('status') == 'completed'])
+            'total_stories': status.get('total_stories', 0),
+            'completed_stories': status.get('completed_stories', 0),
+            'progress_percentage': status.get('progress_percentage', 0)
         }
     
     def parse_user_stories(self) -> Dict[str, Any]:
@@ -209,3 +206,197 @@ class MarkdownParser:
                 section_lines.append(line)
         
         return '\n'.join(section_lines)
+    
+    def _extract_priorities(self, content: str) -> List[Dict[str, Any]]:
+        """Extrahiert priorisierte User Stories aus der Roadmap"""
+        priorities = []
+        
+        # Einfache Extraktion: Suche nach User Stories mit einfacherem Pattern
+        lines = content.split('\n')
+        current_priority = None
+        current_stories = []
+        
+        for i, line in enumerate(lines):
+            # Prioritäts-Header erkennen
+            if line.startswith('## 🎯'):
+                if current_priority and current_stories:
+                    priorities.append({
+                        'name': current_priority,
+                        'stories': current_stories
+                    })
+                
+                # Neue Priorität bestimmen
+                if 'KRITISCH' in line.upper():
+                    current_priority = 'kritisch'
+                elif 'HOCH' in line.upper():
+                    current_priority = 'hoch'
+                elif 'MITTEL' in line.upper():
+                    current_priority = 'mittel'
+                elif 'NIEDRIG' in line.upper():
+                    current_priority = 'niedrig'
+                else:
+                    current_priority = 'niedrig'
+                
+                current_stories = []
+            
+            # User Story erkennen
+            elif line.startswith('### US-') and i < len(lines) - 1:
+                # Story-Details aus den nächsten Zeilen extrahieren
+                story_data = self._extract_story_from_lines(lines, i)
+                if story_data:
+                    story_data['priority'] = current_priority
+                    current_stories.append(story_data)
+        
+        # Abgeschlossene Stories hinzufügen
+        if current_priority and current_stories:
+            priorities.append({
+                'name': current_priority,
+                'stories': current_stories
+            })
+        
+        return priorities
+    
+    def _extract_story_from_lines(self, lines: List[str], start_index: int) -> Dict[str, Any]:
+        """Extrahiert eine User Story aus den Zeilen ab dem gegebenen Index"""
+        if start_index >= len(lines):
+            return None
+        
+        title = lines[start_index].replace('### ', '').strip()
+        
+        # Status, Epic, As, Want, So_that aus den nächsten Zeilen extrahieren
+        status = "Geplant"
+        epic = "Unbekannt"
+        as_user = "Administrator"
+        want = "Funktionalität"
+        so_that = "der Workflow verbessert wird"
+        
+        # Schaue in den nächsten 10 Zeilen nach Details
+        for i in range(start_index + 1, min(start_index + 10, len(lines))):
+            line = lines[i].strip()
+            
+            if line.startswith('**Status:**'):
+                status = line.replace('**Status:**', '').strip()
+            elif line.startswith('**Epic:**'):
+                epic = line.replace('**Epic:**', '').strip()
+            elif line.startswith('**Als**'):
+                as_user = line.replace('**Als**', '').strip()
+            elif line.startswith('**möchte ich**'):
+                want = line.replace('**möchte ich**', '').strip()
+            elif line.startswith('**damit**'):
+                so_that = line.replace('**damit**', '').strip()
+                break
+        
+        return {
+            'title': title,
+            'status': self._normalize_status(status),
+            'epic': epic,
+            'as': as_user,
+            'want': want,
+            'so_that': so_that,
+            'acceptance_criteria': []  # Vereinfacht für jetzt
+        }
+    
+    def _extract_priority_from_title(self, title: str, content: str) -> str:
+        """Extrahiert die Priorität einer User Story basierend auf dem Kontext"""
+        # Suche nach dem Abschnitt, in dem die Story steht
+        lines = content.split('\n')
+        current_section = None
+        
+        for i, line in enumerate(lines):
+            if title in line and line.startswith('###'):
+                # Schaue zurück nach dem nächsten ## Header
+                for j in range(i-1, -1, -1):
+                    if lines[j].startswith('## 🎯'):
+                        current_section = lines[j].lower()
+                        break
+                break
+        
+        if current_section:
+            if 'kritisch' in current_section:
+                return 'kritisch'
+            elif 'hoch' in current_section:
+                return 'hoch'
+            elif 'mittel' in current_section:
+                return 'mittel'
+            elif 'niedrig' in current_section:
+                return 'niedrig'
+        
+        return 'niedrig'
+    
+    def _extract_stories_from_priority(self, content: str) -> List[Dict[str, Any]]:
+        """Extrahiert User Stories aus einem Prioritäts-Abschnitt"""
+        stories = []
+        
+        # User Story Pattern
+        story_pattern = r'### ([^-]+)\s*\*\*Status:\*\*\s*([^*]+)\s*\*\*Epic:\*\*\s*([^*]+)\s*\*\*Als\*\* ([^*]+) \*\*möchte ich\*\* ([^*]+) \*\*damit\*\* ([^*]+)'
+        
+        matches = re.findall(story_pattern, content, re.DOTALL)
+        
+        for title, status, epic, as_user, want, so_that in matches:
+            # Akzeptanzkriterien extrahieren
+            acceptance_criteria = self._extract_acceptance_criteria(content, title)
+            
+            stories.append({
+                'title': title.strip(),
+                'status': self._normalize_status(status.strip()),
+                'epic': epic.strip(),
+                'as': as_user.strip(),
+                'want': want.strip(),
+                'so_that': so_that.strip(),
+                'acceptance_criteria': acceptance_criteria
+            })
+        
+        return stories
+    
+    def _extract_acceptance_criteria(self, content: str, story_title: str) -> List[str]:
+        """Extrahiert Akzeptanzkriterien für eine User Story"""
+        # Suche nach dem Akzeptanzkriterien-Block für diese Story
+        pattern = rf'### {re.escape(story_title)}.*?### |\Z'
+        story_section = re.search(pattern, content, re.DOTALL)
+        
+        if not story_section:
+            return []
+        
+        criteria = []
+        lines = story_section.group(0).split('\n')
+        
+        for line in lines:
+            if line.strip().startswith('- ['):
+                # Entferne Checkbox-Syntax und extrahiere Text
+                criteria_text = re.sub(r'^- \[[ x]\]\s*', '', line.strip())
+                if criteria_text:
+                    criteria.append(criteria_text)
+        
+        return criteria
+    
+    def _extract_backlog_status(self, content: str) -> Dict[str, Any]:
+        """Extrahiert Status-Informationen aus dem Backlog"""
+        status = {}
+        
+        # Gesamtstatistiken extrahieren
+        stats_pattern = r'\*\*Gesamt:\*\*\s*(\d+)\s*User Stories\s*\|\s*\*\*Abgeschlossen:\*\*\s*(\d+)\s*\|\s*\*\*In Bearbeitung:\*\*\s*(\d+)\s*\|\s*\*\*Geplant:\*\*\s*(\d+)'
+        stats_match = re.search(stats_pattern, content)
+        
+        if stats_match:
+            total, completed, in_progress, planned = map(int, stats_match.groups())
+            status.update({
+                'total_stories': total,
+                'completed_stories': completed,
+                'in_progress_stories': in_progress,
+                'planned_stories': planned,
+                'progress_percentage': round((completed / total) * 100) if total > 0 else 0
+            })
+        
+        return status
+    
+    def _normalize_status(self, status: str) -> str:
+        """Normalisiert Status-Strings"""
+        status_lower = status.lower()
+        if 'abgeschlossen' in status_lower or 'completed' in status_lower or '✅' in status:
+            return 'completed'
+        elif 'bearbeitung' in status_lower or 'progress' in status_lower or '🔄' in status:
+            return 'in-progress'
+        elif 'geplant' in status_lower or 'planned' in status_lower or '📋' in status:
+            return 'planned'
+        else:
+            return 'planned'
