@@ -1,0 +1,56 @@
+---
+alwaysApply: true
+---
+
+# Test-Driven Development (TDD) Regel
+
+## Grundprinzipien
+- **RED-GREEN-REFACTOR Zyklus**: Immer zuerst einen fehlschlagenden Test schreiben, dann den minimalen Code für das Bestehen, dann refaktorieren
+- **Test-First Approach**: Niemals Code ohne vorherigen Test schreiben
+- **Kleine Schritte**: Jede Änderung sollte durch einen Test abgedeckt sein
+
+## Implementierungsregeln
+
+### 1. Vor dem Schreiben von Code
+- Schreibe IMMER zuerst einen Test, der die gewünschte Funktionalität beschreibt
+- Der Test muss initial fehlschlagen (RED)
+- Verwende aussagekräftige Testnamen, die das Verhalten beschreiben
+
+### 2. Während der Entwicklung
+- Schreibe nur den minimalen Code, um den Test zum Bestehen zu bringen (GREEN)
+- Führe Tests nach jeder kleinen Änderung aus
+- Refaktoriere den Code, während alle Tests weiterhin bestehen (REFACTOR)
+
+### 3. Test-Struktur
+- Verwende das AAA-Pattern: Arrange, Act, Assert
+- Ein Test = Ein Verhalten
+- Tests sollten unabhängig und isoliert voneinander sein
+- Mock externe Abhängigkeiten
+
+### 4. Code-Qualität
+- Code muss durch Tests abgedeckt sein, bevor er als "fertig" gilt
+- Refaktorierung ist nur erlaubt, wenn alle Tests bestehen
+- Keine Funktionalität ohne entsprechenden Test
+
+### 5. Projekt-spezifische Regeln
+- Für Excel-Analyse: Teste Parser mit bekannten Testdaten
+- Für PDF-Generierung: Teste Template-Erstellung und Daten-Einbindung
+- Für Web-Interface: Teste API-Endpunkte und Datenvalidierung
+- Für Datenbank-Operationen: Teste CRUD-Operationen mit Test-DB
+
+## Anwendung bei Code-Änderungen
+- Bei Bugfixes: Schreibe zuerst einen Test, der den Bug reproduziert
+- Bei neuen Features: Beginne mit Akzeptanz-Tests
+- Bei Refaktorierung: Stelle sicher, dass alle bestehenden Tests weiterhin bestehen
+
+## Test-Pyramide
+- **Unit Tests**: Basis der Pyramide - testen einzelne Funktionen/Klassen
+- **Integration Tests**: Testen Zusammenarbeit zwischen Komponenten
+- **End-to-End Tests**: Testen komplette User-Workflows
+
+## Tools und Konventionen
+- Verwende pytest für Python-Tests
+- Test-Dateien: `test_*.py` oder `*_test.py`
+- Test-Klassen: `Test*`
+- Test-Methoden: `test_*`
+- Fixtures für wiederverwendbare Test-Setups

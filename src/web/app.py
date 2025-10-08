@@ -19,6 +19,7 @@ from flask_cors import CORS
 
 # Modelle importieren
 from src.models.models import Base, Eigentuemer, Messpunkt, Verbrauchsdaten, Rechnung
+# from src.models.zaehler import Zaehler  # Temporär auskommentiert
 from src.models.database import get_db_session, create_tables
 from src.excel_analysis.excel_analyzer import ExcelAnalyzer
 from src.billing.pdf_generator import STWEGPDFGenerator
@@ -564,6 +565,444 @@ def api_billing_status():
             'template_available': True,
             'status': 'active'
         })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/eigentuemer')
+def api_eigentuemer_list():
+    """API: Alle Eigentümer auflisten"""
+    try:
+        session = get_db_session()
+        eigentuemer = session.query(Eigentuemer).all()
+        
+        eigentuemer_data = []
+        for eig in eigentuemer:
+            eigentuemer_data.append({
+                'id': eig.id,
+                'name': eig.name,
+                'wohnung': eig.wohnung,
+                'anteil': eig.anteil,
+                'anteil_prozent': eig.anteil_prozent,
+                'email': eig.email,
+                'telefon': eig.telefon,
+                'aktiv': eig.aktiv,
+                'erstellt_am': eig.erstellt_am.isoformat() if eig.erstellt_am else None,
+                'aktualisiert_am': eig.aktualisiert_am.isoformat() if eig.aktualisiert_am else None,
+                'messpunkte_count': len(eig.messpunkte)
+            })
+        
+        session.close()
+        
+        return jsonify({
+            'eigentuemer': eigentuemer_data,
+            'total_count': len(eigentuemer_data),
+            'active_count': len([e for e in eigentuemer_data if e['aktiv']])
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/eigentuemer/<int:eigentuemer_id>')
+def api_eigentuemer_detail(eigentuemer_id):
+    """API: Einzelnen Eigentümer abrufen"""
+    try:
+        session = get_db_session()
+        eigentuemer = session.query(Eigentuemer).filter(Eigentuemer.id == eigentuemer_id).first()
+        
+        if not eigentuemer:
+            session.close()
+            return jsonify({'error': 'Eigentümer nicht gefunden'}), 404
+        
+        eigentuemer_data = {
+            'id': eigentuemer.id,
+            'name': eigentuemer.name,
+            'wohnung': eigentuemer.wohnung,
+            'anteil': eigentuemer.anteil,
+            'anteil_prozent': eigentuemer.anteil_prozent,
+            'email': eigentuemer.email,
+            'telefon': eigentuemer.telefon,
+            'aktiv': eigentuemer.aktiv,
+            'erstellt_am': eigentuemer.erstellt_am.isoformat() if eigentuemer.erstellt_am else None,
+            'aktualisiert_am': eigentuemer.aktualisiert_am.isoformat() if eigentuemer.aktualisiert_am else None,
+            'messpunkte': [
+                {
+                    'id': mp.id,
+                    'name': mp.name,
+                    'typ': mp.typ,
+                    'aktiv': mp.aktiv
+                }
+                for mp in eigentuemer.messpunkte
+            ]
+        }
+        
+        session.close()
+        return jsonify(eigentuemer_data)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/eigentuemer/<int:eigentuemer_id>', methods=['PUT'])
+def api_eigentuemer_update(eigentuemer_id):
+    """API: Eigentümer aktualisieren"""
+    try:
+        session = get_db_session()
+        eigentuemer = session.query(Eigentuemer).filter(Eigentuemer.id == eigentuemer_id).first()
+        
+        if not eigentuemer:
+            session.close()
+            return jsonify({'error': 'Eigentümer nicht gefunden'}), 404
+        
+        data = request.get_json()
+        
+        # Validierung
+        if 'anteil' in data:
+            anteil = float(data['anteil'])
+            if not (0.0 <= anteil <= 1.0):
+                session.close()
+                return jsonify({'error': 'Anteil muss zwischen 0.0 und 1.0 liegen'}), 400
+        
+        # Felder aktualisieren
+        allowed_fields = ['name', 'wohnung', 'anteil', 'email', 'telefon', 'aktiv']
+        for field in allowed_fields:
+            if field in data:
+                setattr(eigentuemer, field, data[field])
+        
+        # Validierung der Anteil-Summe
+        try:
+            eigentuemer.validate_anteil_sum(session)
+        except ValueError as e:
+            session.rollback()
+            session.close()
+            return jsonify({'error': str(e)}), 400
+        
+        session.commit()
+        
+        # Aktualisierte Daten zurückgeben
+        updated_data = {
+            'id': eigentuemer.id,
+            'name': eigentuemer.name,
+            'wohnung': eigentuemer.wohnung,
+            'anteil': eigentuemer.anteil,
+            'anteil_prozent': eigentuemer.anteil_prozent,
+            'email': eigentuemer.email,
+            'telefon': eigentuemer.telefon,
+            'aktiv': eigentuemer.aktiv,
+            'aktualisiert_am': eigentuemer.aktualisiert_am.isoformat() if eigentuemer.aktualisiert_am else None
+        }
+        
+        session.close()
+        return jsonify({
+            'success': True,
+            'message': 'Eigentümer erfolgreich aktualisiert',
+            'eigentuemer': updated_data
+        })
+        
+    except Exception as e:
+        session.rollback()
+        session.close()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/eigentuemer', methods=['POST'])
+def api_eigentuemer_create():
+    """API: Neuen Eigentümer erstellen"""
+    try:
+        session = get_db_session()
+        data = request.get_json()
+        
+        # Pflichtfelder prüfen
+        required_fields = ['name', 'wohnung', 'anteil']
+        for field in required_fields:
+            if field not in data:
+                session.close()
+                return jsonify({'error': f'Feld "{field}" ist erforderlich'}), 400
+        
+        # Validierung
+        anteil = float(data['anteil'])
+        if not (0.0 <= anteil <= 1.0):
+            session.close()
+            return jsonify({'error': 'Anteil muss zwischen 0.0 und 1.0 liegen'}), 400
+        
+        # Prüfen ob Wohnung bereits existiert
+        existing = session.query(Eigentuemer).filter(Eigentuemer.wohnung == data['wohnung']).first()
+        if existing:
+            session.close()
+            return jsonify({'error': f'Wohnung "{data["wohnung"]}" ist bereits vergeben'}), 400
+        
+        # Neuen Eigentümer erstellen
+        eigentuemer = Eigentuemer(
+            name=data['name'],
+            wohnung=data['wohnung'],
+            anteil=anteil,
+            email=data.get('email'),
+            telefon=data.get('telefon'),
+            aktiv=data.get('aktiv', True)
+        )
+        
+        # Validierung der Anteil-Summe
+        try:
+            eigentuemer.validate_anteil_sum(session)
+        except ValueError as e:
+            session.rollback()
+            session.close()
+            return jsonify({'error': str(e)}), 400
+        
+        session.add(eigentuemer)
+        session.commit()
+        
+        # Erstellten Eigentümer zurückgeben
+        created_data = {
+            'id': eigentuemer.id,
+            'name': eigentuemer.name,
+            'wohnung': eigentuemer.wohnung,
+            'anteil': eigentuemer.anteil,
+            'anteil_prozent': eigentuemer.anteil_prozent,
+            'email': eigentuemer.email,
+            'telefon': eigentuemer.telefon,
+            'aktiv': eigentuemer.aktiv,
+            'erstellt_am': eigentuemer.erstellt_am.isoformat() if eigentuemer.erstellt_am else None
+        }
+        
+        session.close()
+        return jsonify({
+            'success': True,
+            'message': 'Eigentümer erfolgreich erstellt',
+            'eigentuemer': created_data
+        }), 201
+        
+    except Exception as e:
+        session.rollback()
+        session.close()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/eigentuemer/<int:eigentuemer_id>', methods=['DELETE'])
+def api_eigentuemer_delete(eigentuemer_id):
+    """API: Eigentümer löschen (soft delete - deaktivieren)"""
+    try:
+        session = get_db_session()
+        eigentuemer = session.query(Eigentuemer).filter(Eigentuemer.id == eigentuemer_id).first()
+        
+        if not eigentuemer:
+            session.close()
+            return jsonify({'error': 'Eigentümer nicht gefunden'}), 404
+        
+        # Soft delete - Eigentümer deaktivieren statt löschen
+        eigentuemer.aktiv = False
+        session.commit()
+        
+        session.close()
+        return jsonify({
+            'success': True,
+            'message': 'Eigentümer erfolgreich deaktiviert'
+        })
+        
+    except Exception as e:
+        session.rollback()
+        session.close()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/eigentuemer/export')
+def api_eigentuemer_export():
+    """API: Eigentümer-Daten in verschiedenen Formaten exportieren"""
+    try:
+        session = get_db_session()
+        eigentuemer = session.query(Eigentuemer).filter(Eigentuemer.aktiv == True).all()
+        
+        # Format-Parameter
+        export_format = request.args.get('format', 'json')
+        
+        if export_format == 'csv':
+            import csv
+            import io
+            
+            # CSV-Export
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # Header
+            writer.writerow(['Name', 'Wohnung', 'Anteil', 'Anteil_Prozent', 'Email', 'Telefon', 'Aktiv', 'Erstellt_Am'])
+            
+            # Daten
+            for eig in eigentuemer:
+                writer.writerow([
+                    eig.name,
+                    eig.wohnung,
+                    eig.anteil,
+                    eig.anteil_prozent,
+                    eig.email or '',
+                    eig.telefon or '',
+                    eig.aktiv,
+                    eig.erstellt_am.strftime('%Y-%m-%d %H:%M:%S') if eig.erstellt_am else ''
+                ])
+            
+            output.seek(0)
+            csv_content = output.getvalue()
+            output.close()
+            session.close()
+            
+            return csv_content, 200, {
+                'Content-Type': 'text/csv',
+                'Content-Disposition': 'attachment; filename=eigentuemer_export.csv'
+            }
+        
+        elif export_format == 'excel':
+            import pandas as pd
+            import io
+            
+            # Excel-Export
+            data = []
+            for eig in eigentuemer:
+                data.append({
+                    'Name': eig.name,
+                    'Wohnung': eig.wohnung,
+                    'Anteil': eig.anteil,
+                    'Anteil_Prozent': eig.anteil_prozent,
+                    'Email': eig.email or '',
+                    'Telefon': eig.telefon or '',
+                    'Aktiv': eig.aktiv,
+                    'Erstellt_Am': eig.erstellt_am.strftime('%Y-%m-%d %H:%M:%S') if eig.erstellt_am else '',
+                    'Messpunkte_Count': len(eig.messpunkte)
+                })
+            
+            df = pd.DataFrame(data)
+            
+            # Excel in Bytes umwandeln
+            excel_buffer = io.BytesIO()
+            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                df.to_excel(writer, sheet_name='Eigentuemer', index=False)
+            excel_buffer.seek(0)
+            
+            session.close()
+            
+            return excel_buffer.getvalue(), 200, {
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition': 'attachment; filename=eigentuemer_export.xlsx'
+            }
+        
+        elif export_format == 'json':
+            # JSON-Export (Standard)
+            eigentuemer_data = []
+            for eig in eigentuemer:
+                eigentuemer_data.append({
+                    'id': eig.id,
+                    'name': eig.name,
+                    'wohnung': eig.wohnung,
+                    'anteil': eig.anteil,
+                    'anteil_prozent': eig.anteil_prozent,
+                    'email': eig.email,
+                    'telefon': eig.telefon,
+                    'aktiv': eig.aktiv,
+                    'erstellt_am': eig.erstellt_am.isoformat() if eig.erstellt_am else None,
+                    'messpunkte_count': len(eig.messpunkte),
+                    'messpunkte': [
+                        {
+                            'id': mp.id,
+                            'name': mp.name,
+                            'typ': mp.typ
+                        }
+                        for mp in eig.messpunkte
+                    ]
+                })
+            
+            session.close()
+            
+            return jsonify({
+                'export_date': datetime.now().isoformat(),
+                'total_count': len(eigentuemer_data),
+                'eigentuemer': eigentuemer_data
+            })
+        
+        else:
+            session.close()
+            return jsonify({'error': f'Unbekanntes Format: {export_format}. Verfügbare Formate: json, csv, excel'}), 400
+        
+    except Exception as e:
+        session.close()
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/eigentuemer/template')
+def api_eigentuemer_template():
+    """API: Template für Eigentümer-Import erstellen"""
+    try:
+        # Template-Daten erstellen
+        template_data = {
+            'name': 'Max Mustermann',
+            'wohnung': '1A',
+            'anteil': 0.14,
+            'email': 'max@example.com',
+            'telefon': '+41 44 123 45 67',
+            'aktiv': True
+        }
+        
+        # Format-Parameter
+        template_format = request.args.get('format', 'json')
+        
+        if template_format == 'csv':
+            import csv
+            import io
+            
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # Header
+            writer.writerow(['Name', 'Wohnung', 'Anteil', 'Email', 'Telefon', 'Aktiv'])
+            # Beispiel-Zeile
+            writer.writerow([
+                template_data['name'],
+                template_data['wohnung'],
+                template_data['anteil'],
+                template_data['email'],
+                template_data['telefon'],
+                template_data['aktiv']
+            ])
+            
+            output.seek(0)
+            csv_content = output.getvalue()
+            output.close()
+            
+            return csv_content, 200, {
+                'Content-Type': 'text/csv',
+                'Content-Disposition': 'attachment; filename=eigentuemer_template.csv'
+            }
+        
+        elif template_format == 'excel':
+            import pandas as pd
+            import io
+            
+            # Template-Daten
+            template_df = pd.DataFrame([template_data])
+            
+            excel_buffer = io.BytesIO()
+            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                template_df.to_excel(writer, sheet_name='Template', index=False)
+            excel_buffer.seek(0)
+            
+            return excel_buffer.getvalue(), 200, {
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition': 'attachment; filename=eigentuemer_template.xlsx'
+            }
+        
+        else:
+            # JSON-Template (Standard)
+            return jsonify({
+                'template': template_data,
+                'description': 'Template für Eigentümer-Import',
+                'instructions': {
+                    'name': 'Vollständiger Name des Eigentümers',
+                    'wohnung': 'Wohnungsbezeichnung (z.B. 1A, 2B)',
+                    'anteil': 'Anteil als Dezimalzahl (0.0 - 1.0)',
+                    'email': 'E-Mail-Adresse (optional)',
+                    'telefon': 'Telefonnummer (optional)',
+                    'aktiv': 'Status (true/false)'
+                }
+            })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

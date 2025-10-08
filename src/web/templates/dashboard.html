@@ -56,6 +56,12 @@
                                 PDF-Rechnungen
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link module-link" href="#" data-module="eigentuemer-management">
+                                <i class="fas fa-users text-success"></i>
+                                Eigentümer
+                            </a>
+                        </li>
                     </ul>
                     
                     <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
@@ -577,8 +583,217 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Eigentümer-Management Modul -->
+                    <div id="eigentuemer-management-module" class="module-content" style="display: none;">
+                        <!-- Status Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Eigentümer</h6>
+                                                <h4 class="mb-0" id="eigentuemer-total-count">-</h4>
+                                                <small class="text-muted" id="eigentuemer-active-count">- aktiv</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-users text-success"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Wohnungen</h6>
+                                                <h4 class="mb-0" id="wohnungen-count">7</h4>
+                                                <small class="text-muted">Verfügbar</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-home text-info"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Anteile</h6>
+                                                <h4 class="mb-0" id="anteile-sum">100%</h4>
+                                                <small class="text-muted">Gesamtverteilung</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-percentage text-warning"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="card status-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title text-muted">Messpunkte</h6>
+                                                <h4 class="mb-0" id="messpunkte-total">-</h4>
+                                                <small class="text-muted">Zugeteilt</small>
+                                            </div>
+                                            <div class="status-icon">
+                                                <i class="fas fa-chart-line text-primary"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Eigentümer-Verwaltung -->
+                        <div class="row">
+                            <div class="col-lg-8 mb-4">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-users text-success"></i> Eigentümer-Verwaltung
+                                        </h5>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-success btn-sm" onclick="showCreateEigentuemerModal()">
+                                                <i class="fas fa-plus"></i> Neuer Eigentümer
+                                            </button>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-download"></i> Export
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" onclick="exportEigentuemerData('json')">
+                                                        <i class="fas fa-file-code"></i> JSON
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="exportEigentuemerData('csv')">
+                                                        <i class="fas fa-file-csv"></i> CSV
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="exportEigentuemerData('excel')">
+                                                        <i class="fas fa-file-excel"></i> Excel
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="eigentuemer-loading" class="text-center" style="display: none;">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Lade Eigentümer...</span>
+                                            </div>
+                                            <p class="mt-2">Lade Eigentümer-Daten...</p>
+                                        </div>
+                                        
+                                        <div id="eigentuemer-list" class="table-responsive">
+                                            <!-- Eigentümer-Liste wird hier dynamisch geladen -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Schnellaktionen -->
+                            <div class="col-lg-4 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-tools text-info"></i> Schnellaktionen
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-info" onclick="refreshEigentuemerList()">
+                                                <i class="fas fa-sync"></i> Liste aktualisieren
+                                            </button>
+                                            <button class="btn btn-warning" onclick="exportEigentuemerData()">
+                                                <i class="fas fa-download"></i> Daten exportieren
+                                            </button>
+                                            <button class="btn btn-secondary" onclick="showEigentuemerStats()">
+                                                <i class="fas fa-chart-bar"></i> Statistiken
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle"></i>
+                                                Alle Änderungen werden automatisch gespeichert.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Eigentümer-Erstellen Modal -->
+    <div class="modal fade" id="createEigentuemerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus text-success"></i> Neuen Eigentümer erstellen
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-eigentuemer-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="create-name" class="form-label">Name *</label>
+                                <input type="text" class="form-control" id="create-name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="create-wohnung" class="form-label">Wohnung *</label>
+                                <input type="text" class="form-control" id="create-wohnung" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="create-anteil" class="form-label">Anteil (0.0 - 1.0) *</label>
+                                <input type="number" class="form-control" id="create-anteil" step="0.01" min="0" max="1" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="create-email" class="form-label">E-Mail</label>
+                                <input type="email" class="form-control" id="create-email">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="create-telefon" class="form-label">Telefon</label>
+                                <input type="tel" class="form-control" id="create-telefon">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="create-aktiv" checked>
+                                    <label class="form-check-label" for="create-aktiv">
+                                        Aktiv
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-success" onclick="createEigentuemer()">
+                        <i class="fas fa-save"></i> Erstellen
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

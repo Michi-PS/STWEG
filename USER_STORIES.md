@@ -209,10 +209,10 @@
 **damit** ich Änderungen an Adressen, Namen oder anderen Eigentümer-Informationen einfach verwalten kann.
 
 **Akzeptanzkriterien:**
-- [ ] Eigentümer-Liste im Dashboard anzeigen
-- [ ] Einzelne Eigentümer-Daten bearbeiten
-- [ ] Neue Eigentümer hinzufügen
-- [ ] Eigentümer deaktivieren/aktivieren
-- [ ] Validierung der Eingabedaten
+- [x] Eigentümer-Liste im Dashboard anzeigen
+- [x] Einzelne Eigentümer-Daten bearbeiten (Status-Umschaltung)
+- [x] Neue Eigentümer hinzufügen
+- [x] Eigentümer deaktivieren/aktivieren
+- [x] Validierung der Eingabedaten
 - [ ] Änderungshistorie verfolgen
 

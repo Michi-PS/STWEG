@@ -763,7 +763,8 @@ function switchModule(moduleName) {
         const titles = {
             'excel-analysis': 'Excel-Analyse & Kostenaufteilung',
             'development': 'Development & Monitoring',
-            'pdf-billing': 'PDF-Rechnungen & Billing'
+            'pdf-billing': 'PDF-Rechnungen & Billing',
+            'eigentuemer-management': 'Eigentümer-Management'
         };
         moduleTitle.textContent = titles[moduleName] || moduleName;
     }
@@ -795,6 +796,10 @@ async function loadModuleData(moduleName) {
         case 'pdf-billing':
             // PDF-Billing-spezifische Daten laden
             await loadPDFBillingModuleData();
+            break;
+        case 'eigentuemer-management':
+            // Eigentümer-Management-spezifische Daten laden
+            await loadEigentuemerManagementModuleData();
             break;
     }
 }
@@ -1222,6 +1227,489 @@ function showInvoicePreview() {
     // Öffne die Original-Vorlage in einem neuen Tab
     const templateUrl = '/data/sample/Rechnung.pdf';
     window.open(templateUrl, '_blank');
+}
+
+/**
+ * Eigentümer-Management-Modul-Daten laden
+ */
+async function loadEigentuemerManagementModuleData() {
+    console.log('👥 Lade Eigentümer-Management-Modul-Daten...');
+    
+    try {
+        // Eigentümer-Daten laden
+        await loadEigentuemerList();
+        
+    } catch (error) {
+        console.log('ℹ️ Eigentümer-Management-Modul-APIs noch nicht vollständig implementiert');
+    }
+}
+
+/**
+ * Eigentümer-Liste laden
+ */
+async function loadEigentuemerList() {
+    const loadingDiv = document.getElementById('eigentuemer-loading');
+    const listDiv = document.getElementById('eigentuemer-list');
+    
+    // Loading-State anzeigen
+    loadingDiv.style.display = 'block';
+    listDiv.innerHTML = '';
+    
+    try {
+        const response = await fetch('/api/eigentuemer');
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Status-Cards aktualisieren
+            updateEigentuemerStatusCards(data);
+            
+            // Eigentümer-Liste anzeigen
+            displayEigentuemerList(data.eigentuemer);
+            
+        } else {
+            listDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Fehler:</strong> ${data.error}
+                </div>
+            `;
+        }
+    } catch (error) {
+        listDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <strong>Netzwerk-Fehler:</strong> ${error.message}
+            </div>
+        `;
+    } finally {
+        loadingDiv.style.display = 'none';
+    }
+}
+
+/**
+ * Eigentümer-Status-Cards aktualisieren
+ */
+function updateEigentuemerStatusCards(data) {
+    document.getElementById('eigentuemer-total-count').textContent = data.total_count || 0;
+    document.getElementById('eigentuemer-active-count').textContent = `${data.active_count || 0} aktiv`;
+    
+    // Anteil-Summe berechnen
+    const anteilSum = data.eigentuemer.reduce((sum, eig) => sum + (eig.anteil || 0), 0);
+    document.getElementById('anteile-sum').textContent = `${Math.round(anteilSum * 100)}%`;
+    
+    // Messpunkte zählen
+    const messpunkteTotal = data.eigentuemer.reduce((sum, eig) => sum + (eig.messpunkte_count || 0), 0);
+    document.getElementById('messpunkte-total').textContent = messpunkteTotal;
+}
+
+/**
+ * Eigentümer-Liste anzeigen
+ */
+function displayEigentuemerList(eigentuemer) {
+    const listDiv = document.getElementById('eigentuemer-list');
+    
+    if (!eigentuemer || eigentuemer.length === 0) {
+        listDiv.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                Keine Eigentümer gefunden. 
+                <button type="button" class="btn btn-sm btn-success ms-2" onclick="showCreateEigentuemerModal()">
+                    <i class="fas fa-plus"></i> Ersten Eigentümer erstellen
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Wohnung</th>
+                    <th>Anteil</th>
+                    <th>Kontakt</th>
+                    <th>Status</th>
+                    <th>Messpunkte</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    eigentuemer.forEach(eig => {
+        const statusBadge = eig.aktiv ? 
+            '<span class="badge bg-success">Aktiv</span>' : 
+            '<span class="badge bg-secondary">Inaktiv</span>';
+        
+        const kontakt = [];
+        if (eig.email) kontakt.push(`<i class="fas fa-envelope"></i> ${eig.email}`);
+        if (eig.telefon) kontakt.push(`<i class="fas fa-phone"></i> ${eig.telefon}`);
+        const kontaktHtml = kontakt.length > 0 ? kontakt.join('<br>') : '<span class="text-muted">-</span>';
+        
+        html += `
+            <tr class="${eig.aktiv ? '' : 'table-secondary'}">
+                <td>
+                    <strong>${eig.name}</strong>
+                </td>
+                <td>
+                    <span class="badge bg-info">${eig.wohnung}</span>
+                </td>
+                <td>
+                    ${eig.anteil_prozent}%
+                    <small class="text-muted">(${eig.anteil})</small>
+                </td>
+                <td>
+                    ${kontaktHtml}
+                </td>
+                <td>
+                    ${statusBadge}
+                </td>
+                <td>
+                    <span class="badge bg-primary">${eig.messpunkte_count}</span>
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary" onclick="editEigentuemer(${eig.id})" title="Bearbeiten">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-${eig.aktiv ? 'warning' : 'success'}" 
+                                onclick="toggleEigentuemerStatus(${eig.id}, ${!eig.aktiv})" 
+                                title="${eig.aktiv ? 'Deaktivieren' : 'Aktivieren'}">
+                            <i class="fas fa-${eig.aktiv ? 'pause' : 'play'}"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += `
+            </tbody>
+        </table>
+    `;
+    
+    listDiv.innerHTML = html;
+}
+
+/**
+ * Eigentümer bearbeiten
+ */
+async function editEigentuemer(eigentuemerId) {
+    try {
+        console.log(`✏️ Bearbeite Eigentümer: ${eigentuemerId}`);
+        
+        // Eigentümer-Daten laden
+        const response = await fetch(`/api/eigentuemer/${eigentuemerId}`);
+        if (!response.ok) {
+            throw new Error(`Fehler beim Laden: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        const eigentuemer = data.eigentuemer;
+        
+        // Edit-Modal anzeigen
+        showEditEigentuemerModal(eigentuemer);
+        
+    } catch (error) {
+        console.error('Edit-Fehler:', error);
+        showToast(`Fehler beim Laden der Eigentümer-Daten: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Edit-Eigentümer-Modal anzeigen
+ */
+function showEditEigentuemerModal(eigentuemer) {
+    // Modal-HTML erstellen
+    const modalHtml = `
+        <div class="modal fade" id="editEigentuemerModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-edit text-primary"></i> Eigentümer bearbeiten
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editEigentuemerForm">
+                            <div class="mb-3">
+                                <label for="editName" class="form-label">Name *</label>
+                                <input type="text" class="form-control" id="editName" value="${eigentuemer.name}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editWohnung" class="form-label">Wohnung *</label>
+                                <input type="text" class="form-control" id="editWohnung" value="${eigentuemer.wohnung}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editAnteil" class="form-label">Anteil (0.0 - 1.0) *</label>
+                                <input type="number" class="form-control" id="editAnteil" 
+                                       value="${eigentuemer.anteil}" min="0" max="1" step="0.001" required>
+                                <div class="form-text">Aktuell: ${eigentuemer.anteil_prozent}%</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editEmail" class="form-label">E-Mail</label>
+                                <input type="email" class="form-control" id="editEmail" value="${eigentuemer.email || ''}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editTelefon" class="form-label">Telefon</label>
+                                <input type="tel" class="form-control" id="editTelefon" value="${eigentuemer.telefon || ''}">
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="editAktiv" ${eigentuemer.aktiv ? 'checked' : ''}>
+                                    <label class="form-check-label" for="editAktiv">
+                                        Aktiv
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                        <button type="button" class="btn btn-primary" onclick="updateEigentuemer(${eigentuemer.id})">
+                            <i class="fas fa-save"></i> Speichern
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Bestehendes Modal entfernen
+    const existingModal = document.getElementById('editEigentuemerModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Neues Modal hinzufügen
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Modal anzeigen
+    const modal = new bootstrap.Modal(document.getElementById('editEigentuemerModal'));
+    modal.show();
+}
+
+/**
+ * Eigentümer aktualisieren
+ */
+async function updateEigentuemer(eigentuemerId) {
+    try {
+        // Formular-Daten sammeln
+        const formData = {
+            name: document.getElementById('editName').value.trim(),
+            wohnung: document.getElementById('editWohnung').value.trim(),
+            anteil: parseFloat(document.getElementById('editAnteil').value),
+            anteil_prozent: parseFloat(document.getElementById('editAnteil').value) * 100,
+            email: document.getElementById('editEmail').value.trim() || null,
+            telefon: document.getElementById('editTelefon').value.trim() || null,
+            aktiv: document.getElementById('editAktiv').checked
+        };
+        
+        // Validierung
+        if (!formData.name || !formData.wohnung) {
+            throw new Error('Name und Wohnung sind Pflichtfelder');
+        }
+        
+        if (formData.anteil < 0 || formData.anteil > 1) {
+            throw new Error('Anteil muss zwischen 0.0 und 1.0 liegen');
+        }
+        
+        console.log('📝 Aktualisiere Eigentümer:', formData);
+        
+        // API-Aufruf
+        const response = await fetch(`/api/eigentuemer/${eigentuemerId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Fehler: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        
+        // Modal schließen
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editEigentuemerModal'));
+        modal.hide();
+        
+        // Erfolg-Meldung
+        showToast(`Eigentümer "${formData.name}" erfolgreich aktualisiert!`, 'success');
+        
+        // Liste aktualisieren
+        refreshEigentuemerList();
+        
+    } catch (error) {
+        console.error('Update-Fehler:', error);
+        showToast(`Fehler beim Aktualisieren: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Eigentümer-Status umschalten
+ */
+async function toggleEigentuemerStatus(eigentuemerId, newStatus) {
+    console.log(`🔄 Ändere Status von Eigentümer ${eigentuemerId} zu: ${newStatus}`);
+    
+    try {
+        const response = await fetch(`/api/eigentuemer/${eigentuemerId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                aktiv: newStatus
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast(data.message, 'success');
+            // Liste aktualisieren
+            await loadEigentuemerList();
+        } else {
+            showToast(`Fehler: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showToast(`Netzwerk-Fehler: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Eigentümer-Liste aktualisieren
+ */
+function refreshEigentuemerList() {
+    console.log('🔄 Aktualisiere Eigentümer-Liste...');
+    loadEigentuemerList();
+}
+
+/**
+ * Eigentümer-Daten exportieren
+ */
+async function exportEigentuemerData(format = 'json') {
+    try {
+        console.log(`📥 Exportiere Eigentümer-Daten als ${format.toUpperCase()}...`);
+        showToast('Export wird vorbereitet...', 'info');
+        
+        const response = await fetch(`/api/eigentuemer/export?format=${format}`);
+        
+        if (!response.ok) {
+            throw new Error(`Export fehlgeschlagen: ${response.statusText}`);
+        }
+        
+        if (format === 'json') {
+            const data = await response.json();
+            console.log('Export-Daten:', data);
+            
+            // JSON-Datei herunterladen
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `eigentuemer_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast(`Export erfolgreich: ${data.total_count} Eigentümer`, 'success');
+        } else {
+            // CSV/Excel-Datei herunterladen
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = response.headers.get('Content-Disposition')?.split('filename=')[1] || `eigentuemer_export.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast(`Export erfolgreich: ${format.toUpperCase()}-Datei heruntergeladen`, 'success');
+        }
+        
+    } catch (error) {
+        console.error('Export-Fehler:', error);
+        showToast(`Export fehlgeschlagen: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Eigentümer-Statistiken anzeigen
+ */
+function showEigentuemerStats() {
+    console.log('📊 Zeige Eigentümer-Statistiken...');
+    showToast('Statistik-Funktion wird implementiert...', 'info');
+}
+
+/**
+ * Eigentümer-Erstellen Modal anzeigen
+ */
+function showCreateEigentuemerModal() {
+    console.log('➕ Zeige Eigentümer-Erstellen Modal...');
+    
+    // Modal anzeigen
+    const modal = new bootstrap.Modal(document.getElementById('createEigentuemerModal'));
+    modal.show();
+}
+
+/**
+ * Neuen Eigentümer erstellen
+ */
+async function createEigentuemer() {
+    console.log('💾 Erstelle neuen Eigentümer...');
+    
+    // Formular-Daten sammeln
+    const formData = {
+        name: document.getElementById('create-name').value,
+        wohnung: document.getElementById('create-wohnung').value,
+        anteil: parseFloat(document.getElementById('create-anteil').value),
+        email: document.getElementById('create-email').value || null,
+        telefon: document.getElementById('create-telefon').value || null,
+        aktiv: document.getElementById('create-aktiv').checked
+    };
+    
+    // Validierung
+    if (!formData.name || !formData.wohnung || formData.anteil === undefined) {
+        showToast('Bitte füllen Sie alle Pflichtfelder aus.', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/eigentuemer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast(data.message, 'success');
+            
+            // Modal schließen
+            const modal = bootstrap.Modal.getInstance(document.getElementById('createEigentuemerModal'));
+            modal.hide();
+            
+            // Formular zurücksetzen
+            document.getElementById('create-eigentuemer-form').reset();
+            document.getElementById('create-aktiv').checked = true;
+            
+            // Liste aktualisieren
+            await loadEigentuemerList();
+            
+        } else {
+            showToast(`Fehler: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showToast(`Netzwerk-Fehler: ${error.message}`, 'error');
+    }
 }
 
 /**

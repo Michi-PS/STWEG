@@ -1,0 +1,141 @@
+---
+alwaysApply: true
+---
+
+# Git-Commit und Release-Management Regel
+
+## Grundprinzipien
+- **Proaktive Vorschläge**: Der Agent soll selbständig erkennen, wann Code-Änderungen committet oder released werden sollten
+- **Qualitätssicherung**: Nur funktionierender, getesteter Code wird für Commits/Releases vorgeschlagen
+- **Transparente Kommunikation**: Jeder Vorschlag wird mit klarer Begründung und Auswirkungsanalyse präsentiert
+
+## Commit-Vorschläge
+
+### Wann ein Commit vorgeschlagen werden soll:
+1. **Feature-Abschluss**: Ein neues Feature vollständig implementiert und getestet
+2. **Bugfix-Abschluss**: Ein Bug behoben und durch Tests verifiziert
+3. **Refaktorierung**: Code-Qualität verbessert ohne Funktionalitätsänderung
+4. **Dokumentation**: Wichtige Dokumentation hinzugefügt oder aktualisiert
+5. **Konfiguration**: Build-Scripts, Dependencies oder Projekt-Konfiguration geändert
+6. **Test-Abdeckung**: Neue Tests hinzugefügt oder bestehende verbessert
+
+### Commit-Kriterien:
+- Alle Tests bestehen (pytest erfolgreich)
+- Keine Linter-Fehler vorhanden
+- Code ist funktional und getestet
+- Änderungen sind logisch zusammengehörig
+- Commit-Message folgt Conventional Commits Format
+
+### Commit-Message Format:
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Beispiele:
+- `feat(billing): add PDF invoice generation`
+- `fix(excel): resolve parsing error for empty cells`
+- `docs: update API documentation`
+- `test(models): add unit tests for Eigentuemer class`
+
+## Release-Vorschläge
+
+### Wann ein Release vorgeschlagen werden soll:
+1. **Major Release (v2.0.0)**: Breaking changes oder fundamentale Architektur-Änderungen
+2. **Minor Release (v1.1.0)**: Neue Features, die rückwärtskompatibel sind
+3. **Patch Release (v1.0.1)**: Bugfixes oder kleine Verbesserungen
+
+### Release-Kriterien:
+- Alle Tests bestehen
+- Dokumentation ist aktuell
+- Keine bekannten kritischen Bugs
+- Changelog ist aktualisiert
+- Version ist in setup.py/requirements.txt angepasst
+
+### Release-Prozess:
+1. **Version bump** in relevanten Dateien
+2. **Changelog erstellen** mit Änderungen seit letztem Release
+3. **Git tag** mit Versionsnummer erstellen
+4. **Release notes** mit Features/Bugfixes schreiben
+
+## Automatische Erkennung
+
+### Code-Analyse:
+- Überwache Änderungen in `src/` für Feature-Entwicklung
+- Erkenne Test-Änderungen in `tests/`
+- Prüfe Dokumentation-Änderungen in `*.md` Dateien
+- Analysiere Build-Konfiguration in `setup.py`, `requirements.txt`
+
+### Qualitätsprüfung:
+- Führe `pytest` aus vor Commit-Vorschlägen
+- Prüfe Linter-Status mit `flake8`/`black`
+- Validiere Import-Struktur
+- Teste kritische Funktionalitäten
+
+## Vorschlags-Format
+
+### Für Commits:
+```
+🔄 COMMIT VORSCHLAG
+Änderungen: [Beschreibung der Änderungen]
+Tests: ✅ Bestanden / ❌ Fehlgeschlagen
+Linter: ✅ OK / ❌ Fehler
+Begründung: [Warum dieser Commit sinnvoll ist]
+Commit-Message: [Vorgeschlagene Message]
+```
+
+### Für Releases:
+```
+🚀 RELEASE VORSCHLAG
+Version: [Neue Versionsnummer]
+Typ: Major/Minor/Patch
+Änderungen seit letztem Release:
+- [Feature 1]
+- [Bugfix 1]
+- [Verbesserung 1]
+Tests: ✅ Bestanden
+Dokumentation: ✅ Aktuell
+Begründung: [Warum ein Release jetzt sinnvoll ist]
+```
+
+## Ausführungsbefehle
+
+### Commit-Befehle:
+```bash
+git add .
+git commit -m "[Commit-Message]"
+git push origin main
+```
+
+### Release-Befehle:
+```bash
+# Version bump (manuell in setup.py)
+git add .
+git commit -m "chore: bump version to [version]"
+git tag [version]
+git push origin main --tags
+```
+
+## Ausnahmen und Warnungen
+
+### Kein Commit/Release bei:
+- Unvollständigen Features
+- Fehlgeschlagenen Tests
+- Linter-Fehlern
+- Ungetestetem Code
+- Breaking Changes ohne Dokumentation
+
+### Warnung bei:
+- Großen Änderungen ohne ausreichende Tests
+- Änderungen an kritischen Systemen
+- Dependencies-Updates
+- Konfigurationsänderungen
+
+## Implementierung
+- Prüfe nach jeder Code-Änderung automatisch Commit-Bedarf
+- Analysiere Projekt-Status vor Release-Vorschlägen
+- Stelle sicher, dass alle Qualitätskriterien erfüllt sind
+- Kommuniziere Vorschläge klar und mit Begründung
