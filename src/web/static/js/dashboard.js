@@ -1198,7 +1198,7 @@ function createSimpleUserStoriesView(data) {
                                     <h6 class="mb-2 text-primary">
                                         <i class="fas fa-clipboard-list"></i> ${story.id}: ${story.title}
                                     </h6>
-                                    <div class="text-muted small mb-2">
+                                    <div class="user-story-text text-muted small mb-2">
                                         <strong>Als</strong> ${story.as || 'Administrator'}<br>
                                         <strong>möchte ich</strong> ${story.want || story.description || 'Funktionalität'}<br>
                                         <strong>damit</strong> ${story.so_that || 'der Workflow verbessert wird'}

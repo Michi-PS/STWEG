@@ -414,3 +414,40 @@ main {
     background: #a8a8a8;
 }
 
+/* Verbesserte Darstellung für User Stories */
+.user-story-text {
+    line-height: 1.5;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.user-story-text strong {
+    color: var(--primary-color);
+}
+
+/* Scrollbare Bereiche für bessere Lesbarkeit */
+.epics-container, .stories-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.epics-container::-webkit-scrollbar, .stories-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.epics-container::-webkit-scrollbar-track, .stories-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.epics-container::-webkit-scrollbar-thumb, .stories-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.epics-container::-webkit-scrollbar-thumb:hover, .stories-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+

@@ -106,51 +106,111 @@ class MarkdownParser:
         return phases
     
     def _extract_epics(self, content: str) -> List[Dict[str, Any]]:
-        """Extrahiert Epics aus USER_STORIES.md"""
+        """Extrahiert Epics aus USER_STORIES.md (neues Format)"""
         epics = []
         
-        # Suche nach ## Epic X: Pattern
-        epic_pattern = r'## Epic (\d+):\s*([^\n]+)'
-        epic_matches = re.findall(epic_pattern, content)
+        lines = content.split('\n')
+        current_epic = None
+        current_story = None
         
-        for epic_num, epic_title in epic_matches:
-            epic_info = {
-                'number': int(epic_num),
-                'title': epic_title.strip(),
-                'stories': []
-            }
-            
-            # User Stories in diesem Epic extrahieren
-            epic_section = self._extract_section(content, f'Epic {epic_num}')
-            story_pattern = r'### US-(\d+):\s*([^\n]+)'
-            story_matches = re.findall(story_pattern, epic_section)
-            
-            for story_num, story_title in story_matches:
-                story_info = {
-                    'number': int(story_num),
-                    'title': story_title.strip(),
-                    'status': 'planned',
-                    'description': ''
-                }
+        for i, line in enumerate(lines):
+            # Epic Header erkennen: ## Epic X: Titel
+            if line.startswith('## Epic '):
+                # Vorheriges Epic abschließen
+                if current_epic and current_story:
+                    current_epic['stories'].append(current_story)
+                if current_epic:
+                    epics.append(current_epic)
                 
-                # Status bestimmen
-                story_section = self._extract_section(epic_section, f'US-{story_num}')
-                if '[x]' in story_section:
-                    story_info['status'] = 'completed'
-                elif '[ ]' in story_section:
-                    story_info['status'] = 'planned'
+                # Epic-Nummer und Titel extrahieren
+                epic_match = re.match(r'## Epic (\d+):\s*(.+)', line)
+                if epic_match:
+                    epic_num, epic_title = epic_match.groups()
+                    current_epic = {
+                        'number': int(epic_num),
+                        'title': epic_title.strip(),
+                        'stories': []
+                    }
+                    current_story = None
+                    continue
+            
+            # Epic Beschreibung erkennen: **Beschreibung:** ...
+            elif line.startswith('**Beschreibung:**') and current_epic:
+                # Epic-Beschreibung hinzufügen (optional)
+                description = line.replace('**Beschreibung:**', '').strip()
+                current_epic['description'] = description
+                continue
+            
+            # User Story Header erkennen: ### US-XXX: Titel
+            elif line.startswith('### US-') and current_epic:
+                if current_story:
+                    current_epic['stories'].append(current_story)
                 
-                # Beschreibung extrahieren (erste Zeile nach dem Titel)
-                lines = story_section.split('\n')
-                for i, line in enumerate(lines):
-                    if line.strip().startswith(f'### US-{story_num}'):
-                        if i + 1 < len(lines) and lines[i + 1].strip():
-                            story_info['description'] = lines[i + 1].strip()
+                # Story-ID und Titel extrahieren
+                story_match = re.match(r'### US-(\d+):\s*(.+)', line)
+                if story_match:
+                    story_num, story_title = story_match.groups()
+                    current_story = {
+                        'id': f'US-{story_num}',
+                        'number': int(story_num),
+                        'title': story_title.strip(),
+                        'status': 'planned',
+                        'as': 'Administrator',
+                        'want': 'Funktionalität',
+                        'so_that': 'der Workflow verbessert wird',
+                        'acceptance_criteria': []
+                    }
+                    continue
+            
+            # "Als" erkennen
+            elif line.strip().startswith('**Als**') and current_story:
+                as_text = line.replace('**Als**', '').strip()
+                # Entferne redundante "Als" falls vorhanden
+                if as_text.startswith('Als '):
+                    as_text = as_text[4:]
+                current_story['as'] = as_text
+                continue
+            
+            # "möchte ich" erkennen
+            elif line.strip().startswith('**möchte ich**') and current_story:
+                want_text = line.replace('**möchte ich**', '').strip()
+                # Entferne redundante "möchte ich" falls vorhanden
+                if want_text.startswith('möchte ich '):
+                    want_text = want_text[12:]
+                current_story['want'] = want_text
+                continue
+            
+            # "damit" erkennen
+            elif line.strip().startswith('**damit**') and current_story:
+                so_that_text = line.replace('**damit**', '').strip()
+                # Entferne redundante "damit" falls vorhanden
+                if so_that_text.startswith('damit '):
+                    so_that_text = so_that_text[6:]
+                current_story['so_that'] = so_that_text
+                continue
+            
+            # Akzeptanzkriterien erkennen
+            elif line.strip().startswith('**Akzeptanzkriterien:**') and current_story:
+                # Schaue in den nächsten Zeilen nach Kriterien
+                for j in range(i + 1, min(i + 10, len(lines))):
+                    criteria_line = lines[j].strip()
+                    if criteria_line.startswith('- [x]'):
+                        current_story['acceptance_criteria'].append(criteria_line.replace('- [x]', '').strip())
+                        if current_story['status'] == 'planned':
+                            current_story['status'] = 'in-progress'
+                    elif criteria_line.startswith('- [ ]'):
+                        current_story['acceptance_criteria'].append(criteria_line.replace('- [ ]', '').strip())
+                    elif criteria_line.startswith('---') or criteria_line.startswith('##'):
                         break
-                
-                epic_info['stories'].append(story_info)
-            
-            epics.append(epic_info)
+                continue
+        
+        # Letzte Story hinzufügen
+        if current_epic and current_story:
+            current_epic['stories'].append(current_story)
+        
+        # Epic hinzufügen
+        if current_epic:
+            epics.append(current_epic)
         
         return epics
     
