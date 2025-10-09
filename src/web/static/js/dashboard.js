@@ -846,6 +846,21 @@ async function loadDevelopmentModuleData() {
         if (userStoriesResponse.ok) {
             const userStoriesData = await userStoriesResponse.json();
             createSimpleUserStoriesView(userStoriesData);
+
+            // Obere Status-Karte: User Stories Zähler aktualisieren
+            // Unterstützt sowohl /full (completed_stories/total_stories)
+            // als auch vereinfachte Struktur (completed/total)
+            const completedStories =
+                (typeof userStoriesData.completed_stories !== 'undefined')
+                    ? userStoriesData.completed_stories
+                    : (userStoriesData.completed || 0);
+            const totalStories =
+                (typeof userStoriesData.total_stories !== 'undefined')
+                    ? userStoriesData.total_stories
+                    : (userStoriesData.total || 0);
+
+            updateElement('user-stories-completed', completedStories);
+            updateElement('user-stories-total', `${totalStories} gesamt`);
         }
         
         // Test-Status für Development-Modul aktualisieren
